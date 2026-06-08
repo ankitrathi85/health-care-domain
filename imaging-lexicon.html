@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imaging Lexicon — A Clinical Imaging & Health IT Study Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Spline+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bone:#f4f0e8;
+    --paper:#fbf9f4;
+    --ink:#1a1f26;
+    --ink-soft:#454d57;
+    --line:#d8d1c2;
+    --signal:#0d6e6e;        /* clinical teal */
+    --signal-deep:#0a4f4f;
+    --coral:#e8552d;         /* alert / accent */
+    --amber:#c98a14;
+    --violet:#5b4b8a;
+    --shadow:rgba(26,31,38,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Spline Sans',sans-serif;
+    background:var(--bone);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(13,110,110,.05), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(232,85,45,.04), transparent 42%);
+    min-height:100vh;
+  }
+  ::selection{background:var(--signal);color:#fff}
+  .mono{font-family:'JetBrains Mono',monospace}
+
+  /* ---------- Header ---------- */
+  header{
+    border-bottom:1.5px solid var(--ink);
+    background:var(--paper);
+    position:sticky;top:0;z-index:50;
+  }
+  .topbar{
+    max-width:1180px;margin:0 auto;padding:14px 28px;
+    display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .glyph{
+    width:42px;height:42px;border:1.5px solid var(--ink);border-radius:50%;
+    display:grid;place-items:center;position:relative;background:var(--ink);flex:none;
+  }
+  .glyph::before{content:"";width:18px;height:18px;border:2.5px solid var(--bone);border-radius:50%}
+  .glyph::after{content:"";position:absolute;width:30px;height:2px;background:var(--signal);transform:rotate(-45deg)}
+  .brand h1{font-family:'Fraunces',serif;font-weight:900;font-size:1.32rem;letter-spacing:-.02em;line-height:1}
+  .brand .sub{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-top:3px}
+
+  nav{display:flex;flex-wrap:wrap;gap:4px;background:var(--bone);border:1.5px solid var(--ink);border-radius:40px;padding:4px;justify-content:center}
+  nav button{
+    font-family:'Spline Sans';font-weight:600;font-size:.82rem;
+    border:none;background:none;color:var(--ink-soft);cursor:pointer;
+    padding:8px 15px;border-radius:30px;transition:.2s;letter-spacing:.01em;
+  }
+  nav button:hover{color:var(--ink)}
+  nav button.active{background:var(--ink);color:var(--paper)}
+
+  main{max-width:1180px;margin:0 auto;padding:40px 28px 90px}
+  .view{display:none;animation:fade .45s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    border:1.5px solid var(--ink);background:var(--ink);color:var(--bone);
+    border-radius:18px;padding:46px 44px;position:relative;overflow:hidden;margin-bottom:34px;
+  }
+  .hero::after{
+    content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;
+    border:1.5px solid rgba(244,240,232,.18);border-radius:50%;
+    box-shadow:0 0 0 26px rgba(244,240,232,.04), inset 0 0 0 40px rgba(13,110,110,.12);
+  }
+  .hero .kicker{font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--signal);margin-bottom:16px}
+  .hero h2{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2rem,4.4vw,3.1rem);line-height:1.02;letter-spacing:-.02em;max-width:18ch}
+  .hero h2 em{font-style:italic;color:var(--signal);font-weight:500}
+  .hero p{max-width:54ch;margin-top:18px;color:rgba(244,240,232,.78);font-size:1.02rem}
+  .hero .cta{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+  .btn{
+    font-family:'Spline Sans';font-weight:600;font-size:.9rem;cursor:pointer;
+    padding:12px 24px;border-radius:40px;border:1.5px solid var(--bone);transition:.22s;text-decoration:none;display:inline-block;
+  }
+  .btn-solid{background:var(--signal);border-color:var(--signal);color:#fff}
+  .btn-solid:hover{background:#0a8585;border-color:#0a8585}
+  .btn-ghost{background:transparent;color:var(--bone)}
+  .btn-ghost:hover{background:var(--bone);color:var(--ink)}
+
+  .stat-row{display:flex;gap:34px;margin-top:34px;position:relative;flex-wrap:wrap}
+  .stat .n{font-family:'Fraunces',serif;font-weight:900;font-size:2rem;color:var(--bone);line-height:1}
+  .stat .l{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,240,232,.6);margin-top:5px}
+
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 20px;gap:16px;flex-wrap:wrap}
+  .section-head h3{font-family:'Fraunces',serif;font-weight:900;font-size:1.6rem;letter-spacing:-.01em}
+  .section-head .hint{font-size:.82rem;color:var(--ink-soft)}
+
+  /* ---------- Module cards ---------- */
+  .mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px}
+  .mod{
+    border:1.5px solid var(--ink);border-radius:14px;background:var(--paper);
+    padding:22px 22px 20px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;
+    text-align:left;font-family:inherit;color:inherit;
+  }
+  .mod:hover{transform:translateY(-3px);box-shadow:6px 6px 0 var(--ink)}
+  .mod .tagn{font-family:'JetBrains Mono';font-size:.7rem;letter-spacing:.1em;color:var(--ink-soft)}
+  .mod .swatch{width:34px;height:6px;border-radius:6px;margin-bottom:16px}
+  .mod h4{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:6px 0 8px;letter-spacing:-.01em}
+  .mod p{font-size:.84rem;color:var(--ink-soft);min-height:38px}
+  .mod .meta{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+  .mod .count{font-size:.74rem;font-weight:600;color:var(--ink-soft)}
+  .mod .go{font-family:'JetBrains Mono';font-size:.8rem;font-weight:700;color:var(--signal)}
+  .pbar{height:4px;background:var(--line);border-radius:4px;margin-top:10px;overflow:hidden}
+  .pbar i{display:block;height:100%;background:var(--signal);width:0;transition:width .5s}
+
+  /* ---------- Learning Paths ---------- */
+  .back-link:hover{color:var(--ink)}
+  .path-hero{border:1.5px solid var(--ink);border-radius:16px;background:var(--paper);padding:30px 32px;margin-bottom:32px;box-shadow:6px 6px 0 var(--ink)}
+  .path-hero h3{font-family:'Fraunces',serif;font-weight:900;font-size:1.85rem;margin:12px 0 8px;letter-spacing:-.01em}
+  .path-hero p{color:var(--ink-soft);max-width:62ch;font-size:.96rem}
+  .path-prog{display:flex;align-items:center;gap:14px;margin-top:20px}
+  .path-prog .mono{font-size:.82rem;color:var(--ink-soft);font-weight:700;min-width:48px;text-align:right}
+  .roadmap{position:relative}
+  .stage{display:flex;gap:20px;position:relative;padding-bottom:30px}
+  .stage::before{content:"";position:absolute;left:18px;top:38px;bottom:-4px;width:2px;background:var(--line)}
+  .stage:last-child::before{display:none}
+  .stage-marker{width:38px;height:38px;border-radius:50%;color:#fff;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:900;font-size:1.05rem;flex:none;z-index:1;border:2px solid var(--bone)}
+  .stage-body{flex:1;min-width:0;padding-top:5px}
+  .stage-body h5{font-family:'Fraunces',serif;font-weight:600;font-size:1.22rem;margin-bottom:4px;letter-spacing:-.01em}
+  .stage-note{font-size:.86rem;color:var(--ink-soft);margin-bottom:13px;max-width:62ch}
+  .path-list{margin-top:6px}
+  .kdot{width:9px;height:9px;border-radius:50%;border:1.6px solid var(--line);flex:none;margin-left:10px;transition:.2s}
+  .kdot.on{background:var(--signal);border-color:var(--signal)}
+  .btn.pk.done{background:var(--signal);border-color:var(--signal)!important;color:#fff!important}
+
+  /* ---------- Flashcards ---------- */
+  .fc-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+  .pill-select{display:flex;gap:6px;flex-wrap:wrap}
+  .pill{
+    font-family:'JetBrains Mono';font-size:.72rem;font-weight:500;cursor:pointer;
+    border:1.5px solid var(--line);background:var(--paper);color:var(--ink-soft);
+    padding:6px 14px;border-radius:30px;transition:.18s;
+  }
+  .pill:hover{border-color:var(--ink);color:var(--ink)}
+  .pill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  .flashwrap{display:flex;flex-direction:column;align-items:center;gap:22px}
+  .card-scene{width:100%;max-width:640px;height:360px;perspective:1600px;cursor:pointer}
+  .card3d{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+  .card3d.flip{transform:rotateY(180deg)}
+  .face{
+    position:absolute;inset:0;backface-visibility:hidden;border:1.5px solid var(--ink);
+    border-radius:20px;padding:40px;display:flex;flex-direction:column;justify-content:center;
+    box-shadow:8px 8px 0 var(--ink);
+  }
+  .face.front{background:var(--paper)}
+  .face.back{background:var(--ink);color:var(--bone);transform:rotateY(180deg)}
+  .face .cat-tag{font-family:'JetBrains Mono';font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;position:absolute;top:26px;left:40px}
+  .face .idx{font-family:'JetBrains Mono';font-size:.7rem;position:absolute;top:26px;right:40px;color:var(--ink-soft)}
+  .face.back .idx{color:rgba(244,240,232,.5)}
+  .front .abbr{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.4rem,7vw,4rem);letter-spacing:-.02em;line-height:1}
+  .front .full{font-size:1.05rem;color:var(--ink-soft);margin-top:10px;font-weight:500}
+  .front .tap{position:absolute;bottom:26px;left:40px;font-size:.74rem;color:var(--ink-soft);letter-spacing:.08em}
+  .back .def{font-size:1.06rem;line-height:1.6}
+  .back .note{margin-top:18px;padding-top:16px;border-top:1px solid rgba(244,240,232,.22);font-size:.88rem;color:var(--signal)}
+  .back .note b{color:#3fb3b3;font-weight:700;font-family:'JetBrains Mono';font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:5px}
+
+  .fc-controls{display:flex;align-items:center;gap:18px}
+  .rnd{
+    width:54px;height:54px;border-radius:50%;border:1.5px solid var(--ink);background:var(--paper);
+    cursor:pointer;font-size:1.3rem;display:grid;place-items:center;transition:.18s;color:var(--ink);
+  }
+  .rnd:hover{background:var(--ink);color:var(--paper)}
+  .rnd:disabled{opacity:.3;cursor:not-allowed}
+  .progress-txt{font-family:'JetBrains Mono';font-size:.82rem;color:var(--ink-soft);min-width:70px;text-align:center}
+  .know-row{display:flex;gap:10px}
+  .know-row .btn{padding:9px 20px;font-size:.82rem;border-color:var(--ink);color:var(--ink)}
+  .know-row .got:hover{background:var(--signal);border-color:var(--signal);color:#fff}
+  .know-row .again:hover{background:var(--coral);border-color:var(--coral);color:#fff}
+
+  /* ---------- Glossary ---------- */
+  .search-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+  .search-box{flex:1;min-width:240px;position:relative}
+  .search-box input{
+    width:100%;font-family:'Spline Sans';font-size:.95rem;padding:13px 16px 13px 44px;
+    border:1.5px solid var(--ink);border-radius:12px;background:var(--paper);color:var(--ink);
+  }
+  .search-box input:focus{outline:none;box-shadow:4px 4px 0 var(--signal)}
+  .search-box svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--ink-soft)}
+  .gloss-list{display:flex;flex-direction:column;gap:0;border:1.5px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--paper)}
+  .gentry{border-bottom:1px solid var(--line);transition:background .15s}
+  .gentry:last-child{border-bottom:none}
+  .gentry summary{
+    list-style:none;cursor:pointer;padding:16px 22px;display:flex;align-items:center;gap:16px;
+  }
+  .gentry summary::-webkit-details-marker{display:none}
+  .gentry[open]{background:var(--bone)}
+  .gentry summary:hover{background:var(--bone)}
+  .gentry .term-abbr{font-family:'JetBrains Mono';font-weight:700;font-size:.95rem;min-width:120px;color:var(--ink)}
+  .gentry .term-full{flex:1;font-size:.9rem;color:var(--ink-soft)}
+  .gentry .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .gentry .chev{font-family:'JetBrains Mono';color:var(--ink-soft);transition:transform .2s}
+  .gentry[open] .chev{transform:rotate(90deg)}
+  .gbody{padding:0 22px 20px 22px;animation:fade .3s}
+  .gbody .def{font-size:.94rem;line-height:1.6;max-width:80ch}
+  .gbody .note{margin-top:12px;font-size:.86rem;color:var(--signal-deep);background:rgba(13,110,110,.07);padding:11px 14px;border-radius:9px;border-left:3px solid var(--signal)}
+  .gbody .note b{font-family:'JetBrains Mono';font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:4px}
+  .empty{text-align:center;padding:50px;color:var(--ink-soft);font-style:italic}
+  .count-line{font-family:'JetBrains Mono';font-size:.78rem;color:var(--ink-soft);margin-bottom:14px}
+
+  /* ---------- Quiz ---------- */
+  .quiz-card{border:1.5px solid var(--ink);border-radius:18px;background:var(--paper);padding:40px;max-width:720px;margin:0 auto;box-shadow:8px 8px 0 var(--ink)}
+  .quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .quiz-meta .qn{font-family:'JetBrains Mono';font-size:.78rem;color:var(--ink-soft);letter-spacing:.1em}
+  .quiz-meta .score{font-family:'JetBrains Mono';font-size:.82rem;font-weight:700;color:var(--signal)}
+  .qbar{height:5px;background:var(--line);border-radius:5px;overflow:hidden;margin-bottom:26px}
+  .qbar i{display:block;height:100%;background:var(--signal);transition:width .4s}
+  .qprompt{font-size:.8rem;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:8px;text-transform:uppercase;font-family:'JetBrains Mono'}
+  .qquestion{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;line-height:1.3;margin-bottom:26px}
+  .qquestion .qabbr{color:var(--signal-deep)}
+  .opts{display:flex;flex-direction:column;gap:11px}
+  .opt{
+    text-align:left;font-family:'Spline Sans';font-size:.95rem;cursor:pointer;
+    border:1.5px solid var(--line);background:var(--bone);color:var(--ink);
+    padding:15px 18px;border-radius:11px;transition:.16s;display:flex;gap:13px;align-items:flex-start;
+  }
+  .opt:hover:not(:disabled){border-color:var(--ink);transform:translateX(4px)}
+  .opt .key{font-family:'JetBrains Mono';font-weight:700;color:var(--ink-soft);flex:none}
+  .opt.correct{background:rgba(13,110,110,.12);border-color:var(--signal);color:var(--signal-deep)}
+  .opt.wrong{background:rgba(232,85,45,.1);border-color:var(--coral);color:#a8331a}
+  .opt:disabled{cursor:default}
+  .opt.correct .key{color:var(--signal)}
+  .opt.wrong .key{color:var(--coral)}
+  .qnext{margin-top:24px;display:flex;justify-content:space-between;align-items:center;min-height:46px}
+  .qexplain{font-size:.86rem;color:var(--ink-soft);flex:1;padding-right:16px;animation:fade .3s}
+  .qexplain b{color:var(--ink)}
+  .quiz-start,.quiz-result{text-align:center;padding:30px 0}
+  .quiz-start p{max-width:48ch;margin:0 auto 24px;color:var(--ink-soft)}
+  .result-score{font-family:'Fraunces',serif;font-weight:900;font-size:4.5rem;line-height:1;letter-spacing:-.03em}
+  .result-grade{font-family:'JetBrains Mono';font-size:.9rem;letter-spacing:.2em;text-transform:uppercase;margin-top:8px}
+  .mode-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+
+  /* ---------- Journey ---------- */
+  .journey-intro{border:1.5px solid var(--ink);background:var(--ink);color:var(--bone);border-radius:16px;padding:34px 36px;margin-bottom:30px;position:relative;overflow:hidden}
+  .journey-intro::after{content:"";position:absolute;right:-50px;bottom:-70px;width:200px;height:200px;border:1.5px solid rgba(244,240,232,.16);border-radius:50%}
+  .journey-intro .kicker{font-family:'JetBrains Mono';font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--signal);margin-bottom:12px}
+  .journey-intro h3{font-family:'Fraunces',serif;font-weight:900;font-size:1.95rem;letter-spacing:-.01em;margin-bottom:10px;position:relative}
+  .journey-intro p{color:rgba(244,240,232,.82);max-width:64ch;font-size:.98rem;position:relative}
+  .thread-bar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+  .thread-intro{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border:1.5px solid var(--line);border-left-width:5px;border-radius:12px;background:var(--paper);margin-bottom:24px}
+  .thread-intro .tnum{font-family:'Fraunces',serif;font-weight:900;font-size:1.5rem;line-height:1;flex:none}
+  .thread-intro .ttext h4{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin-bottom:3px}
+  .thread-intro .ttext p{font-size:.88rem;color:var(--ink-soft);margin:0}
+  .thread-intro .ttext .meta{font-family:'JetBrains Mono';font-size:.66rem;letter-spacing:.1em;color:var(--ink-soft);margin-top:6px}
+  .scene{display:grid;grid-template-columns:.9fr 1.1fr;border:1.5px solid var(--ink);border-radius:16px;overflow:hidden;margin-bottom:22px;background:var(--paper);box-shadow:6px 6px 0 var(--ink)}
+  .scene .illo{background:var(--bone);border-right:1.5px solid var(--ink);min-height:230px;display:flex;align-items:center;justify-content:center;padding:20px}
+  .scene .illo svg{width:100%;height:auto;max-height:210px}
+  .scene .scene-body{padding:28px 30px}
+  .scene .stagenum{font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:.16em;color:var(--signal-deep);font-weight:700}
+  .scene h4{font-family:'Fraunces',serif;font-weight:600;font-size:1.42rem;margin:6px 0 12px;letter-spacing:-.01em}
+  .scene .narr{font-size:.95rem;color:var(--ink-soft);line-height:1.62}
+  .scene .narr b{color:var(--ink);font-weight:600}
+  .scene .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px;padding-top:15px;border-top:1px solid var(--line)}
+  .scene .chips .lbl{font-family:'JetBrains Mono';font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);width:100%;margin-bottom:3px}
+  .tchip{font-family:'JetBrains Mono';font-size:.72rem;font-weight:500;cursor:pointer;border:1.5px solid var(--line);background:var(--bone);color:var(--ink);padding:5px 11px;border-radius:30px;transition:.16s;display:inline-flex;align-items:center;gap:7px}
+  .tchip:hover{border-color:var(--ink);transform:translateY(-1px)}
+  .tchip .cdot{width:7px;height:7px;border-radius:50%;flex:none}
+  .scene.flip .illo{border-right:none;border-left:1.5px solid var(--ink);grid-column:2}
+  .scene.flip .scene-body{grid-column:1;grid-row:1}
+  @media(max-width:680px){
+    .scene,.scene.flip{grid-template-columns:1fr}
+    .scene .illo,.scene.flip .illo{border-right:none;border-left:none;border-bottom:1.5px solid var(--ink);grid-column:1;grid-row:1}
+    .scene.flip .scene-body{grid-row:2}
+  }
+  /* ---------- Modal ---------- */
+  .modal-bg{position:fixed;inset:0;background:rgba(26,31,38,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+  .modal-bg.show{display:flex;animation:fade .2s}
+  .modal{background:var(--paper);border:1.5px solid var(--ink);border-radius:16px;max-width:520px;width:100%;padding:30px 32px;box-shadow:10px 10px 0 var(--ink);position:relative;max-height:85vh;overflow:auto}
+  .modal .x{position:absolute;top:14px;right:16px;border:none;background:none;font-size:1.6rem;cursor:pointer;color:var(--ink-soft);line-height:1}
+  .modal .x:hover{color:var(--ink)}
+  .modal .mcat{font-family:'JetBrains Mono';font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+  .modal .mabbr{font-family:'Fraunces',serif;font-weight:900;font-size:2rem;letter-spacing:-.02em;margin:8px 0 2px;line-height:1.05}
+  .modal .mfull{color:var(--ink-soft);font-size:1rem;margin-bottom:16px}
+  .modal .mdef{font-size:.98rem;line-height:1.6}
+  .modal .mnote{margin-top:16px;font-size:.88rem;color:var(--signal-deep);background:rgba(13,110,110,.08);padding:12px 15px;border-radius:10px;border-left:3px solid var(--signal)}
+  .modal .mnote b{font-family:'JetBrains Mono';font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:5px}
+
+  footer{border-top:1.5px solid var(--line);text-align:center;padding:30px;font-size:.8rem;color:var(--ink-soft)}
+  footer .mono{color:var(--ink)}
+
+  @media(max-width:620px){
+    .topbar{padding:12px 16px}
+    main{padding:26px 16px 70px}
+    .hero{padding:32px 24px}
+    .face{padding:28px}
+    .quiz-card{padding:26px}
+    nav{width:100%;justify-content:center}
+    .brand h1{font-size:1.1rem}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="glyph"></div>
+      <div>
+        <h1>Imaging&nbsp;Lexicon</h1>
+        <div class="sub">Clinical Imaging · Health IT</div>
+      </div>
+    </div>
+    <nav>
+      <button data-view="home" class="active">Overview</button>
+      <button data-view="journey">Journey</button>
+      <button data-view="paths">Paths</button>
+      <button data-view="learn">Flashcards</button>
+      <button data-view="glossary">Glossary</button>
+      <button data-view="quiz">Quiz</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ============ HOME ============ -->
+  <section class="view active" id="home">
+    <div class="hero">
+      <div class="kicker">// orientation module</div>
+      <h2>Learn the language of <em>medical imaging</em> &amp; health IT.</h2>
+      <p>A field guide to the acronyms and workflows behind enterprise imaging — PACS, DICOM, HL7, FHIR, IHE, the modalities, and the standards that move a study from scanner to report. Built for the non-clinical professional who needs fluency fast.</p>
+      <div class="cta">
+        <a class="btn btn-solid" data-jump="paths">Follow a learning path →</a>
+        <a class="btn btn-ghost" data-jump="learn">Browse flashcards</a>
+        <a class="btn btn-ghost" data-jump="quiz">Test yourself</a>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="n" id="stat-terms">0</div><div class="l">Terms</div></div>
+        <div class="stat"><div class="n" id="stat-cats">0</div><div class="l">Modules</div></div>
+        <div class="stat"><div class="n" id="stat-learned">0</div><div class="l">Marked known</div></div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h3>Study modules</h3>
+      <span class="hint">Tap a module to drill its cards · progress is saved on your device</span>
+    </div>
+    <div class="mod-grid" id="mod-grid"></div>
+  </section>
+
+  <!-- ============ LEARN ============ -->
+  <section class="view" id="learn">
+    <div class="section-head">
+      <h3>Flashcards</h3>
+      <span class="hint">Tap card to flip · arrows to move · mark what you know</span>
+    </div>
+    <div class="fc-bar">
+      <div class="pill-select" id="fc-filters"></div>
+    </div>
+    <div class="flashwrap">
+      <div class="card-scene" id="scene">
+        <div class="card3d" id="card3d">
+          <div class="face front">
+            <span class="cat-tag" id="fc-cat"></span>
+            <span class="idx" id="fc-idx"></span>
+            <div class="abbr" id="fc-abbr"></div>
+            <div class="full" id="fc-full"></div>
+            <div class="tap">tap to reveal definition</div>
+          </div>
+          <div class="face back">
+            <span class="cat-tag" id="fc-cat2"></span>
+            <span class="idx" id="fc-idx2"></span>
+            <div class="def" id="fc-def"></div>
+            <div class="note" id="fc-note"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fc-controls">
+        <button class="rnd" id="prev" title="Previous">‹</button>
+        <span class="progress-txt" id="fc-progress">0 / 0</span>
+        <button class="rnd" id="next" title="Next">›</button>
+      </div>
+      <div class="know-row">
+        <button class="btn again" id="mark-again">Review again</button>
+        <button class="btn got" id="mark-known">I know this ✓</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GLOSSARY ============ -->
+  <section class="view" id="glossary">
+    <div class="section-head">
+      <h3>Glossary</h3>
+      <span class="hint">Search any term, acronym, or word in a definition</span>
+    </div>
+    <div class="search-row">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="search" placeholder="e.g. accession, C-STORE, vendor neutral, HIPAA…" autocomplete="off">
+      </div>
+    </div>
+    <div class="pill-select" id="gloss-filters" style="margin-bottom:18px"></div>
+    <div class="count-line" id="gloss-count"></div>
+    <div class="gloss-list" id="gloss-list"></div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section class="view" id="quiz">
+    <div class="section-head">
+      <h3>Quiz</h3>
+      <span class="hint">10 questions · multiple choice · drawn from the full lexicon</span>
+    </div>
+    <div class="quiz-card" id="quiz-card"></div>
+  </section>
+
+  <!-- ============ PATHS ============ -->
+  <section class="view" id="paths">
+    <div class="section-head">
+      <h3>Learning paths</h3>
+      <span class="hint">Guided routes through the lexicon · follow the stages in order</span>
+    </div>
+    <div id="paths-home"></div>
+    <div id="path-detail" style="display:none"></div>
+  </section>
+
+  <!-- ============ JOURNEY ============ -->
+  <section class="view" id="journey">
+    <div class="journey-intro">
+      <div class="kicker">// stories to hang it on</div>
+      <h3>The Journeys</h3>
+      <p>Imaginary patients and the people behind the screens — eight interwoven stories that, together, touch every term in the lexicon. Start with Maria's chest scan, then branch into screening, the cath lab, the modality tour, and the technical world underneath. Tap any term to read its definition.</p>
+    </div>
+    <div class="thread-bar" id="thread-bar"></div>
+    <div class="thread-intro" id="thread-intro"></div>
+    <div id="journey-scenes"></div>
+  </section>
+</main>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <button class="x" id="modal-x" aria-label="Close">×</button>
+    <div class="mcat" id="m-cat"></div>
+    <div class="mabbr" id="m-abbr"></div>
+    <div class="mfull" id="m-full"></div>
+    <div class="mdef" id="m-def"></div>
+    <div class="mnote" id="m-note"></div>
+  </div>
+</div>
+
+<footer>
+  <span class="mono">Imaging Lexicon</span> — a self-hosted study console · all content runs locally in your browser
+</footer>
+
+<script>
+/* =========================================================
+   DATA — the lexicon
+   cat keys: modality | systems | dicom | interop | workflow | general | qa
+   ========================================================= */
+const CATS = {
+  modality: {label:"Modalities",      color:"#0d6e6e", blurb:"The machines that acquire images."},
+  systems:  {label:"Core Systems",    color:"#5b4b8a", blurb:"PACS, RIS, VNA and the platforms images live in."},
+  dicom:    {label:"DICOM",           color:"#e8552d", blurb:"The imaging file & network standard, end to end."},
+  interop:  {label:"Interoperability",color:"#c98a14", blurb:"HL7, FHIR, IHE — how systems talk to each other."},
+  workflow: {label:"Workflow & Roles",color:"#2563a8", blurb:"Order to report: the people and the steps."},
+  cardio:   {label:"Cardiology Imaging", color:"#b5295a", blurb:"Echo, the cath lab, ECG and cardiovascular data."},
+  radiology:{label:"Radiology Practice", color:"#2f7d4f", blurb:"Contrast, dose, reporting, and how reads happen."},
+  pacs:     {label:"PACS Operations",  color:"#6d28d9", blurb:"Routing, storage, migration, displays, admin."},
+  general:  {label:"Healthcare & Regulatory", color:"#1a1f26", blurb:"HIPAA, payers, coding, device regulation."},
+  qa:       {label:"QA & Testing",    color:"#a8331a", blurb:"Validating imaging systems & interfaces."}
+};
+
+const TERMS = [
+  // ---- MODALITIES ----
+  {a:"Modality", f:"Imaging device / method", c:"modality", d:"The general term for any piece of equipment that acquires medical images — a CT scanner, MRI, ultrasound unit, X-ray room, etc. In DICOM, each study carries a two-letter modality code (CT, MR, US…).", n:"Modality codes show up constantly in test data and DICOM headers; learning the two-letter codes pays off fast."},
+  {a:"CT", f:"Computed Tomography", c:"modality", d:"Uses X-rays taken from many angles and reconstructed by computer into cross-sectional 'slices'. Produces large multi-image studies, often hundreds or thousands of images per exam.", n:"CT studies are big — a good stress case for storage, transfer, and viewer performance testing."},
+  {a:"MRI / MR", f:"Magnetic Resonance Imaging", c:"modality", d:"Uses strong magnetic fields and radio waves (no ionizing radiation) to image soft tissue in great detail. Studies contain many 'series' captured with different sequences.", n:"Series-heavy; useful for testing series-level navigation and hanging protocols."},
+  {a:"US", f:"Ultrasound (Sonography)", c:"modality", d:"Uses high-frequency sound waves to produce real-time images. Can capture both still frames and cine (video) clips.", n:"Watch for multi-frame / cine objects — they behave differently from single-frame images in viewers."},
+  {a:"CR", f:"Computed Radiography", c:"modality", d:"Older digital X-ray using a reusable phosphor plate that is scanned to create a digital image. Largely succeeded by DR.", n:""},
+  {a:"DR / DX", f:"Digital Radiography", c:"modality", d:"Direct digital X-ray where detectors convert X-rays straight into a digital image — no plate to scan. 'DX' is the common DICOM modality code.", n:""},
+  {a:"MG", f:"Mammography", c:"modality", d:"Specialized low-dose X-ray of the breast for screening and diagnosis. Has strict display and workflow requirements (e.g., specific hanging protocols, prior comparisons).", n:"Highly regulated; presentation and prior-comparison behavior are common test focus areas."},
+  {a:"NM", f:"Nuclear Medicine", c:"modality", d:"Images function rather than anatomy by detecting radiation from an injected radiotracer. Includes techniques like bone scans and SPECT.", n:""},
+  {a:"PET", f:"Positron Emission Tomography", c:"modality", d:"A nuclear-medicine technique showing metabolic activity, frequently fused with CT (PET/CT) to combine function with anatomy.", n:"Fused studies test a viewer's ability to register and overlay two image sets."},
+  {a:"XA / RF", f:"X-ray Angiography / Fluoroscopy", c:"modality", d:"Real-time, moving X-ray imaging. Angiography images blood vessels (often with contrast); fluoroscopy guides procedures live. Produces multi-frame cine.", n:""},
+  {a:"Laterality", f:"Side of the body (L/R)", c:"modality", d:"Indicates whether an image is of the left or right side (e.g., left knee). Stored in DICOM and critical for correct interpretation.", n:"A classic data-integrity bug source — wrong/missing laterality is a high-severity defect."},
+
+  // ---- CORE SYSTEMS ----
+  {a:"PACS", f:"Picture Archiving and Communication System", c:"systems", d:"The core system that stores, retrieves, distributes and displays medical images. Radiologists read studies on PACS workstations; it is the heart of imaging operations.", n:"This is the product family at the center of enterprise imaging — your primary system under test."},
+  {a:"RIS", f:"Radiology Information System", c:"systems", d:"Manages the non-image side of radiology: scheduling, patient registration, ordering, exam tracking, and reporting. Feeds order and patient data to PACS.", n:"Most PACS bugs trace back to data the RIS sent (or didn't) — interface testing lives here."},
+  {a:"HIS", f:"Hospital Information System", c:"systems", d:"The hospital-wide administrative and clinical system handling admissions, billing, and patient demographics. Upstream source of patient identity.", n:""},
+  {a:"EHR", f:"Electronic Health Record", c:"systems", d:"A patient's comprehensive longitudinal health record shared across providers and settings. Broader than an EMR.", n:"EHR vs EMR is a frequent terminology trap — EHR is the wider, shareable record."},
+  {a:"EMR", f:"Electronic Medical Record", c:"systems", d:"The digital chart within a single practice or organization. Narrower in scope than an EHR and generally not shared externally.", n:""},
+  {a:"VNA", f:"Vendor Neutral Archive", c:"systems", d:"A storage system that holds images and documents in a standard, vendor-independent format so any compliant viewer can access them — decoupling the archive from any one PACS vendor.", n:"Central to 'enterprise imaging': the strategy of one archive serving many departments and viewers."},
+  {a:"Enterprise Imaging", f:"EI", c:"systems", d:"The organization-wide strategy and platform for capturing, managing, and viewing images from every department — radiology, cardiology, dermatology, pathology, point-of-care — not just radiology.", n:"The umbrella concept for this whole domain; everything else slots under it."},
+  {a:"CVIS", f:"Cardiovascular Information System", c:"systems", d:"A specialized system (like a RIS, but for cardiology) managing cardiac imaging, structured cardiac reporting, and measurements.", n:""},
+  {a:"Zero-footprint viewer", f:"ZFP / Universal Viewer", c:"systems", d:"A web-based image viewer that runs in a browser with nothing installed on the device. Enables clinicians to view studies anywhere.", n:"Cross-browser/device matrix testing is essential — a big QA surface area."},
+  {a:"Worklist", f:"Reading / acquisition worklist", c:"systems", d:"The prioritized list of work to be done — studies awaiting acquisition (technologist) or interpretation (radiologist). Drives daily workflow.", n:""},
+  {a:"Broker / Interface Engine", f:"Integration middleware", c:"systems", d:"Middleware that translates and routes messages (e.g., HL7, DICOM) between systems that don't natively speak the same dialect. Mirth Connect is a common example.", n:"Where most cross-system mapping logic — and mapping bugs — actually lives."},
+
+  // ---- DICOM ----
+  {a:"DICOM", f:"Digital Imaging and Communications in Medicine", c:"dicom", d:"The universal standard for storing and transmitting medical images. It defines both the file format (image + embedded metadata) and the network protocol devices use to exchange images.", n:"The single most important standard in this domain. Knowing it is non-negotiable for imaging QA."},
+  {a:"DICOM Tag", f:"Data element (group,element)", c:"dicom", d:"A labeled metadata field inside a DICOM object, identified by a (group,element) pair like (0010,0010) for Patient Name. Hundreds exist, covering patient, study, and image attributes.", n:"Validating that the right values land in the right tags is bread-and-butter imaging QA."},
+  {a:"UID", f:"Unique Identifier", c:"dicom", d:"A globally unique string that identifies DICOM objects. Study Instance UID, Series Instance UID, and SOP Instance UID uniquely tag a study, a series, and a single image respectively.", n:"Duplicate or mismatched UIDs cause merge/overwrite defects — high-impact and worth targeted tests."},
+  {a:"Study / Series / Instance", f:"DICOM hierarchy", c:"dicom", d:"The three-level structure of imaging data: a Study (one exam) contains one or more Series (groups of related images, e.g., one MR sequence), each containing Instances (individual images).", n:"This hierarchy underpins query/retrieve, navigation, and storage logic everywhere."},
+  {a:"SOP Class", f:"Service-Object Pair Class", c:"dicom", d:"Defines what kind of object and operation a DICOM exchange involves (e.g., 'CT Image Storage'). Both sides must support the same SOP Classes to interoperate.", n:"Supported SOP Classes are listed in the conformance statement — your interoperability checklist."},
+  {a:"AE Title", f:"Application Entity Title", c:"dicom", d:"The name a DICOM device/application uses to identify itself on the network. Two systems must have each other's AE Title, IP, and port correctly configured to communicate.", n:"A mistyped AE Title is one of the most common 'why won't it connect?' issues."},
+  {a:"DIMSE", f:"DICOM Message Service Element", c:"dicom", d:"The set of commands DICOM devices use to request services over the network — the verbs of DICOM networking (C-STORE, C-FIND, C-MOVE, C-ECHO).", n:""},
+  {a:"C-STORE", f:"DICOM store operation", c:"dicom", d:"The command to send/push an image from one device to another (e.g., a scanner storing images to PACS).", n:""},
+  {a:"C-FIND", f:"DICOM query operation", c:"dicom", d:"The command to search a remote system for studies matching criteria (patient, date, modality) without retrieving the images themselves.", n:""},
+  {a:"C-MOVE / C-GET", f:"DICOM retrieve operations", c:"dicom", d:"Commands to pull images from a remote archive. C-MOVE asks the archive to send images to a destination; C-GET returns them on the same connection.", n:"C-FIND then C-MOVE is the classic 'query/retrieve' test path."},
+  {a:"C-ECHO", f:"DICOM verification ('ping')", c:"dicom", d:"A simple handshake to confirm two DICOM devices can communicate — the imaging equivalent of a ping.", n:"Your first smoke test for any new DICOM connection."},
+  {a:"MWL", f:"Modality Worklist", c:"dicom", d:"A DICOM service that pushes the day's scheduled exams (patient + order details) to the scanner, so technologists pick from a list instead of typing data by hand.", n:"Prevents manual-entry errors; broken MWL leads directly to mislabeled studies."},
+  {a:"MPPS", f:"Modality Performed Procedure Step", c:"dicom", d:"A DICOM message from the scanner reporting that an exam was started/completed and what was actually performed — closing the loop on the worklist.", n:""},
+  {a:"Storage Commitment", f:"DICOM storage confirmation", c:"dicom", d:"A handshake where the archive formally confirms it has safely stored received images, so the sender can safely delete its local copy.", n:"A key data-safety test: confirm commitment really fires before source deletion."},
+  {a:"Transfer Syntax", f:"Encoding & compression rules", c:"dicom", d:"Defines how DICOM pixel data is encoded and whether/how it's compressed (e.g., uncompressed, JPEG lossless, JPEG2000) for a given exchange.", n:"Lossy vs lossless transfer syntax is a clinical-quality and compliance concern — test image fidelity."},
+  {a:"De-identification", f:"Anonymization", c:"dicom", d:"Removing or replacing patient-identifying tags from DICOM objects so they can be used for research, testing, or teaching without exposing PHI.", n:"Essential for building safe test data — verify nothing identifying survives in any tag, including private/burned-in pixels."},
+  {a:"Conformance Statement", f:"DICOM Conformance Statement", c:"dicom", d:"A vendor document declaring exactly which DICOM features, SOP Classes, and transfer syntaxes a product supports. The contract for interoperability.", n:"Your spec source: test against what the conformance statement claims, and flag gaps."},
+  {a:"GSPS", f:"Grayscale Softcopy Presentation State", c:"dicom", d:"A DICOM object that stores how an image should be displayed — window/level, zoom, rotation, annotations — separately from the pixels, so views are reproducible.", n:""},
+  {a:"SR", f:"Structured Report", c:"dicom", d:"A DICOM object that encodes report content (measurements, findings) as structured, machine-readable data rather than free text.", n:""},
+  {a:"Window / Level", f:"Brightness & contrast mapping", c:"dicom", d:"Controls that map the wide range of stored pixel values to displayable shades of gray — 'window' sets contrast range, 'level' sets the midpoint. Lets a reader inspect bone vs soft tissue in the same image.", n:""},
+  {a:"Hanging Protocol", f:"Display layout rules", c:"dicom", d:"Saved rules for how studies auto-arrange on screen (which series, which monitor, comparison priors) based on modality and body part — saving readers manual setup.", n:"Subtle, high-value testing area: small layout errors frustrate radiologists daily."},
+
+  // ---- INTEROPERABILITY ----
+  {a:"HL7 v2", f:"Health Level Seven, version 2.x", c:"interop", d:"The long-dominant messaging standard for exchanging clinical and administrative data (orders, results, admissions) between healthcare systems. Pipe-and-hat delimited text messages.", n:"The workhorse interface format feeding PACS/RIS — most integration testing involves HL7 v2."},
+  {a:"FHIR", f:"Fast Healthcare Interoperability Resources", c:"interop", d:"A modern, web/API-based interoperability standard (pronounced 'fire') using REST and JSON/XML 'resources'. Increasingly used alongside or instead of HL7 v2.", n:"Newer systems expose FHIR APIs — expect REST/JSON test cases, not just pipe-delimited messages."},
+  {a:"ADT", f:"Admit, Discharge, Transfer message", c:"interop", d:"An HL7 v2 message type carrying patient demographic and encounter events (admission, transfer, name change). Keeps patient identity in sync across systems.", n:"ADT updates drive patient-record reconciliation — a rich source of identity-mismatch defects."},
+  {a:"ORM / OMG", f:"Order message", c:"interop", d:"An HL7 v2 message that places or updates an order — e.g., a request for a chest CT — triggering scheduling and the modality worklist.", n:""},
+  {a:"ORU", f:"Observation Result message", c:"interop", d:"An HL7 v2 message that delivers results — including a finalized radiology report — back to the ordering system and the EHR.", n:"Report-delivery testing centers on ORU: right report, right patient, right status."},
+  {a:"Segment / Field", f:"HL7 message structure", c:"interop", d:"HL7 v2 messages are built from segments (lines like PID for patient ID, OBR for order), each split into fields by the pipe (|) character, with components split by the caret (^).", n:"Reading raw HL7 — finding PID-5 (name) or OBR-3 (accession) — is a daily QA skill."},
+  {a:"MLLP", f:"Minimal Lower Layer Protocol", c:"interop", d:"The simple wrapper protocol used to send HL7 v2 messages over TCP/IP, marking where each message begins and ends.", n:""},
+  {a:"ACK", f:"Acknowledgment message", c:"interop", d:"The HL7 reply confirming a message was received and accepted (or rejecting it). Confirms the interface handshake.", n:"Negative ACKs (rejections) are gold for finding interface defects — test malformed inputs."},
+  {a:"IHE", f:"Integrating the Healthcare Enterprise", c:"interop", d:"An initiative that defines 'profiles' — precise recipes for combining standards like DICOM and HL7 to solve real workflow problems consistently across vendors.", n:"IHE profiles are de-facto interoperability test specs; SWF and XDS-I come up often in imaging."},
+  {a:"IHE SWF", f:"Scheduled Workflow profile", c:"interop", d:"An IHE profile defining the standard end-to-end radiology flow: order → schedule → worklist → acquire → store → report, and which messages connect each step.", n:"A ready-made blueprint for an end-to-end integration test scenario."},
+  {a:"XDS / XDS-I", f:"Cross-Enterprise Document (Imaging) Sharing", c:"interop", d:"IHE profiles for sharing documents (XDS) and imaging (XDS-I) across organizations via a shared registry and repository — the basis of many image-exchange networks.", n:""},
+  {a:"PIX / PDQ", f:"Patient Identifier Cross-ref / Demographics Query", c:"interop", d:"IHE profiles for matching the same patient across systems that use different medical record numbers (PIX) and for querying patient demographics (PDQ).", n:"Underpins patient-matching logic — test the edge cases (twins, similar names, merged records)."},
+
+  // ---- WORKFLOW & ROLES ----
+  {a:"Order / Requisition", f:"Imaging request", c:"workflow", d:"A clinician's request for a specific imaging exam on a patient. It kicks off scheduling, the worklist, and eventually billing.", n:"The trigger event for the whole imaging chain — trace it end to end in testing."},
+  {a:"Accession Number", f:"Order/exam identifier", c:"workflow", d:"A unique number assigned to an imaging order that links the order, the acquired images, and the report together across systems.", n:"The 'join key' across RIS, PACS, and reports — mismatches here break the whole chain. Test it relentlessly."},
+  {a:"MRN", f:"Medical Record Number", c:"workflow", d:"The identifier a single organization uses for a patient. Different facilities may assign the same patient different MRNs — hence patient-matching standards.", n:"MRN vs accession confusion is common; one identifies the patient, the other the exam."},
+  {a:"Referring Physician", f:"Ordering provider", c:"workflow", d:"The clinician who requested the imaging exam and receives the results. Distinct from the radiologist who interprets it.", n:""},
+  {a:"Radiologist", f:"Interpreting physician", c:"workflow", d:"The doctor who reads (interprets) the images and produces the diagnostic report. The primary PACS power-user.", n:"Your most demanding end user — viewer performance and accuracy directly affect them."},
+  {a:"Technologist", f:"Rad Tech / Technician", c:"workflow", d:"The professional who operates the imaging equipment and acquires the images, working from the modality worklist.", n:""},
+  {a:"Prior / Comparison", f:"Prior study", c:"workflow", d:"An earlier study of the same patient pulled up alongside the current one so the radiologist can compare changes over time.", n:"Auto-fetching the correct priors is a core (and frequently buggy) workflow to test."},
+  {a:"Report status", f:"Preliminary / Final / Addendum", c:"workflow", d:"Stages a radiology report moves through: preliminary (draft, often unsigned), final/verified (signed), and addendum (an addition after finalization).", n:"Status transitions must propagate correctly to the EHR — a key ORU/result-delivery test."},
+  {a:"Critical Findings", f:"Critical results", c:"workflow", d:"Urgent, potentially life-threatening findings that must be communicated to the care team immediately, often with documented closed-loop acknowledgment.", n:"Closed-loop notification is high-stakes; test that alerts fire and acknowledgments are recorded."},
+  {a:"TAT", f:"Turnaround Time", c:"workflow", d:"A key performance metric: the time from exam completion to a finalized report. Heavily tracked operationally.", n:""},
+  {a:"STAT", f:"Urgent priority", c:"workflow", d:"A priority flag marking an order as urgent, pushing it to the top of worklists for fast acquisition and reading.", n:"Verify priority flags actually re-sort worklists as expected."},
+  {a:"Reconciliation", f:"Study/patient reconciliation", c:"workflow", d:"Correcting studies that arrived with missing or wrong patient/order information — matching an 'unidentified' study to the right patient and order.", n:"A messy but vital workflow; test the unidentified/broken-study queues thoroughly."},
+
+  // ---- HEALTHCARE & REGULATORY ----
+  {a:"HIPAA", f:"Health Insurance Portability and Accountability Act", c:"general", d:"U.S. law setting national standards for protecting patient health information, including privacy and security rules that any imaging system must satisfy.", n:"Underpins access-control, audit, and de-identification requirements you'll test against."},
+  {a:"PHI", f:"Protected Health Information", c:"general", d:"Any individually identifiable health information — names, dates, MRNs, images that can identify a patient. Strictly regulated under HIPAA.", n:"Know exactly what counts as PHI so test data is genuinely safe to use."},
+  {a:"PII", f:"Personally Identifiable Information", c:"general", d:"Information that can identify an individual (name, SSN, address). PHI is the health-context subset of PII.", n:""},
+  {a:"HITECH", f:"Health Information Technology for Economic and Clinical Health Act", c:"general", d:"U.S. law that strengthened HIPAA enforcement and promoted EHR adoption, including stricter breach-notification rules.", n:""},
+  {a:"CMS", f:"Centers for Medicare & Medicaid Services", c:"general", d:"The U.S. federal agency administering Medicare and Medicaid and setting many rules that shape reimbursement and health IT.", n:""},
+  {a:"Payer", f:"Insurer", c:"general", d:"The entity that pays for healthcare services — an insurance company or government program. Contrasted with the 'provider' who delivers care.", n:""},
+  {a:"CPT", f:"Current Procedural Terminology", c:"general", d:"A standardized code set describing medical procedures and services (including imaging exams) used for billing.", n:""},
+  {a:"ICD-10", f:"International Classification of Diseases, 10th rev.", c:"general", d:"The standard code set for diagnoses and conditions, used in records and billing worldwide.", n:""},
+  {a:"NPI", f:"National Provider Identifier", c:"general", d:"A unique 10-digit number identifying a healthcare provider in the U.S., used across transactions.", n:""},
+  {a:"PACS as Medical Device", f:"FDA Class II / 510(k)", c:"general", d:"In the U.S., diagnostic imaging software like PACS is regulated by the FDA, typically as a Class II medical device cleared via a 510(k) submission.", n:"Why imaging QA is rigorous and documented: defects can have regulatory and patient-safety weight."},
+  {a:"SaMD", f:"Software as a Medical Device", c:"general", d:"Software intended for a medical purpose that performs that purpose without being part of a hardware device — including many imaging and AI tools.", n:"Frames the compliance expectations around the software you're testing."},
+  {a:"IEC 62304", f:"Medical device software lifecycle standard", c:"general", d:"An international standard defining lifecycle processes (including verification and validation) for medical device software.", n:"Often the backbone of an imaging QA org's documented test processes."},
+  {a:"Audit Trail", f:"Audit log", c:"general", d:"A tamper-evident record of who accessed or changed what, and when — required for security, compliance, and breach investigation.", n:"Verify sensitive actions are logged completely and accurately; gaps are compliance defects."},
+
+  // ---- QA & TESTING ----
+  {a:"Verification vs Validation", f:"V&V", c:"qa", d:"Verification asks 'did we build it right?' (meets spec); validation asks 'did we build the right thing?' (meets user/clinical need). Both are required in regulated device software.", n:"This distinction is formal and audited in medical software — use the terms precisely."},
+  {a:"Conformance Testing", f:"Standards compliance testing", c:"qa", d:"Testing that a system behaves exactly as a standard (DICOM, HL7, an IHE profile) requires, often against the vendor's conformance statement.", n:""},
+  {a:"Interface Testing", f:"HL7/DICOM integration testing", c:"qa", d:"Testing the messages flowing between systems — confirming orders, demographics, images, and results map correctly and survive edge cases.", n:"The dominant test type in enterprise imaging; most real defects are integration defects."},
+  {a:"DICOM Validation Tools", f:"DVTk, dciodvfy", c:"qa", d:"Utilities that check whether DICOM objects and network behavior conform to the standard — flagging missing required tags or illegal values. DVTk and dciodvfy are common.", n:"Add these to your toolkit; they automate a lot of object-level conformance checking."},
+  {a:"HL7 / DICOM Simulator", f:"Test harness", c:"qa", d:"A tool that mimics a sending or receiving system — e.g., a fake scanner or fake RIS — so you can test one system without the real counterpart.", n:"Lets you trigger edge cases and faults on demand; central to repeatable interface testing."},
+  {a:"Synthetic / De-identified Test Data", f:"Safe test data", c:"qa", d:"Patient data that is either fabricated or stripped of identifiers, used so testing never exposes real PHI.", n:"Building a clean, varied de-identified data set is one of the highest-value QA investments."},
+  {a:"Round-trip Testing", f:"End-to-end image integrity", c:"qa", d:"Sending an image through a full path (acquire → store → retrieve → display) and confirming it arrives unchanged — pixels and metadata intact.", n:"Especially important when compression or format conversion happens along the way."},
+  {a:"IQ / OQ / PQ", f:"Installation / Operational / Performance Qualification", c:"qa", d:"A structured validation sequence for regulated systems: it's installed correctly (IQ), it operates per spec (OQ), and it performs in real use (PQ).", n:"Common framework for validating a clinical imaging deployment."},
+  {a:"Traceability Matrix", f:"Requirements traceability", c:"qa", d:"A document linking every requirement to the test(s) that prove it works — demonstrating full coverage. Expected in regulated device software.", n:"Auditors look for this; it's often a QA-owned deliverable."},
+  {a:"Regression Testing", f:"Re-testing after change", c:"qa", d:"Re-running tests after a change to confirm nothing previously working has broken — critical in tightly integrated imaging systems where one change ripples widely.", n:"In imaging, a small interface change can break distant workflows — broad regression matters."},
+
+  // ---- CARDIOLOGY IMAGING ----
+  {a:"ECG / EKG", f:"Electrocardiogram", c:"cardio", d:"A recording of the heart's electrical activity as waveforms. Stored as DICOM waveform objects, PDFs, or structured data, usually managed in a CVIS and surfaced in the EHR.", n:"Waveform objects behave unlike images — confirm your viewer and archive handle the DICOM waveform SOP classes."},
+  {a:"Echocardiogram", f:"Echo / TTE", c:"cardio", d:"An ultrasound of the heart. TTE (transthoracic) is the standard external scan; it produces cine loops plus a battery of measurements. The most common cardiac imaging exam.", n:"Cine multi-frame plus structured measurements — a good combined test of clip playback and SR handling."},
+  {a:"TEE", f:"Transesophageal Echocardiogram", c:"cardio", d:"An echo performed with an ultrasound probe passed down the esophagus for clearer images of the heart, often used during procedures.", n:""},
+  {a:"Cardiac Catheterization", f:"Cath / Cardiac Cath", c:"cardio", d:"An invasive procedure threading a catheter through a vessel into the heart to diagnose or treat disease. The cath lab generates angiographic cine plus hemodynamic data.", n:"Cath-lab data spans images and physiological waveforms — a key CVIS↔PACS integration point to test."},
+  {a:"Coronary Angiography", f:"Coronary angiogram", c:"cardio", d:"X-ray imaging of the coronary arteries using injected contrast, captured as XA cine 'runs' during catheterization.", n:""},
+  {a:"PCI", f:"Percutaneous Coronary Intervention", c:"cardio", d:"Catheter-based treatment of narrowed/blocked coronary arteries, e.g., balloon angioplasty and stent placement.", n:""},
+  {a:"Hemodynamics", f:"Pressure & flow data", c:"cardio", d:"Pressure, flow, and oxygen measurements recorded in the cath lab — physiological data (not images) that flows into the cardiology record.", n:"Non-image clinical data; test that it lands in the report and EHR correctly, separate from the cine images."},
+  {a:"IVUS", f:"Intravascular Ultrasound", c:"cardio", d:"Ultrasound imaging from inside a blood vessel via a catheter-mounted probe, used to assess plaque and stent placement.", n:""},
+  {a:"Nuclear Stress / MPI", f:"Myocardial Perfusion Imaging", c:"cardio", d:"A nuclear-medicine study comparing blood flow to the heart muscle at rest versus under stress, to detect ischemia.", n:""},
+  {a:"Cardiac CT / Calcium Score", f:"CCTA / coronary calcium", c:"cardio", d:"CT of the heart — coronary CT angiography (CCTA) images the arteries, while calcium scoring quantifies coronary calcification as a risk marker.", n:""},
+  {a:"Cardiac MRI", f:"CMR", c:"cardio", d:"MRI of the heart to assess function, blood flow, and tissue characteristics (e.g., scarring) without radiation.", n:""},
+  {a:"EP", f:"Electrophysiology", c:"cardio", d:"The study and treatment of the heart's electrical system and rhythm disorders (e.g., ablation). EP labs generate their own imaging and data.", n:""},
+  {a:"Ejection Fraction", f:"EF", c:"cardio", d:"The percentage of blood pumped out of a ventricle with each beat — a core measure of heart function carried in cardiac reports and structured measurements.", n:"A representative discrete measurement to trace from acquisition through SR into the final report."},
+  {a:"Holter Monitor", f:"Ambulatory ECG", c:"cardio", d:"A portable device that continuously records ECG over 24–48 hours (or longer) to catch intermittent rhythm problems.", n:""},
+
+  // ---- RADIOLOGY PRACTICE ----
+  {a:"Contrast Media", f:"Contrast agent", c:"radiology", d:"Substances given to a patient (iodine for CT/X-ray, gadolinium for MRI, barium for GI studies) to make specific structures stand out on images.", n:"Whether contrast was used is recorded and affects protocol/billing — a useful data point to validate end to end."},
+  {a:"Gadolinium", f:"MRI contrast agent", c:"radiology", d:"A contrast agent injected for many MRI exams to enhance visibility of tissues, vessels, and lesions.", n:""},
+  {a:"ALARA", f:"As Low As Reasonably Achievable", c:"radiology", d:"The guiding safety principle for ionizing radiation: keep patient dose as low as reasonably achievable while still getting a diagnostic image.", n:""},
+  {a:"Radiation Dose", f:"Dose Report / RDSR", c:"radiology", d:"The recorded radiation exposure from an exam. Modern systems emit a DICOM Radiation Dose Structured Report (RDSR) for tracking and compliance.", n:"Dose SR capture/extraction is a discrete, testable data flow with regulatory weight."},
+  {a:"Teleradiology", f:"Remote reading", c:"radiology", d:"Interpretation of images by radiologists located off-site, enabling after-hours coverage and access to subspecialists.", n:"Stresses remote access, viewer performance over networks, and study routing — all rich test areas."},
+  {a:"Findings vs Impression", f:"Report structure", c:"radiology", d:"Standard report sections: 'Findings' lists detailed observations; 'Impression' is the concise summary and conclusion the referring clinician reads first.", n:""},
+  {a:"BI-RADS", f:"Breast Imaging Reporting & Data System", c:"radiology", d:"A standardized scheme (categories 0–6) for reporting mammography and breast imaging results and recommended follow-up.", n:"Structured categories are testable enumerations — confirm valid values flow correctly into reports/results."},
+  {a:"RADS systems", f:"LI-RADS, PI-RADS, etc.", c:"radiology", d:"A family of standardized reporting/risk-categorization systems for specific organs — liver (LI-RADS), prostate (PI-RADS), lung, and more.", n:""},
+  {a:"Incidental Finding", f:"Incidentaloma", c:"radiology", d:"An unexpected finding unrelated to the reason the exam was ordered, which may still require follow-up.", n:""},
+  {a:"Wet Read / Prelim", f:"Preliminary read", c:"radiology", d:"A quick preliminary interpretation given before the formal final report — common in emergency and after-hours settings.", n:"Prelim-to-final status changes must propagate correctly; a frequent source of result-delivery defects."},
+  {a:"Discrepancy", f:"Read discrepancy", c:"radiology", d:"A meaningful difference between a preliminary and final interpretation (or between two readers). Tracked as a quality metric.", n:""},
+  {a:"Subspecialty Read", f:"Specialist interpretation", c:"radiology", d:"Interpretation by a radiologist focused on a body area or modality — neuroradiology, musculoskeletal (MSK), body, chest, breast, etc. Drives worklist routing.", n:"Routing studies to the right subspecialty worklist is rules-driven — test the assignment logic."},
+  {a:"Projection / View", f:"AP, PA, Lateral", c:"radiology", d:"Standardized orientations for X-ray images — e.g., AP (front-to-back), PA (back-to-front), and lateral (side). Recorded in DICOM and used in display layout.", n:""},
+  {a:"Phantom", f:"QC test object", c:"radiology", d:"A specially designed object (not a patient) scanned to calibrate equipment and verify image quality during routine QC.", n:"Phantom studies make excellent repeatable, PHI-free test data for image-quality checks."},
+  {a:"NPO", f:"Nil Per Os (nothing by mouth)", c:"radiology", d:"A preparation instruction meaning the patient should not eat or drink before certain exams (e.g., some contrast or sedation studies).", n:""},
+
+  // ---- PACS OPERATIONS ----
+  {a:"Auto-routing", f:"Routing rules", c:"pacs", d:"Rules that automatically forward incoming studies to the right destinations (a specialist's worklist, a remote site, the archive) based on attributes like modality, body part, or location.", n:"Rules engines are bug magnets — test boundary conditions and overlapping rules carefully."},
+  {a:"Prefetching", f:"Prior auto-retrieval", c:"pacs", d:"Proactively retrieving a patient's relevant prior studies from the archive so they're ready the instant the radiologist opens the current exam.", n:"Test that the correct priors are fetched (and incorrect ones aren't) across messy patient histories."},
+  {a:"DICOM Router / Gateway", f:"Imaging gateway", c:"pacs", d:"A device or service that receives DICOM traffic and forwards, filters, or transforms it between systems — often where tag correction happens.", n:""},
+  {a:"Tag Morphing / Coercion", f:"DICOM tag editing", c:"pacs", d:"Modifying DICOM tag values in transit or on ingest — for example, coercing a patient ID or accession number to match the local system's expected value.", n:"Powerful but risky: a wrong coercion rule can silently corrupt identity. A prime negative-test target."},
+  {a:"Tiered Storage", f:"Online / nearline / offline", c:"pacs", d:"Storing recent, frequently accessed studies on fast storage while moving older studies to cheaper, slower tiers to control cost.", n:"Retrieval from cold tiers can be slow — test latency and that nothing is lost on the way down or back up."},
+  {a:"Study Lifecycle / Retention", f:"Purge rules", c:"pacs", d:"Policies governing how long studies are kept before being archived or deleted, often driven by legal and clinical retention requirements.", n:"Deletion logic is high-risk; verify retention rules never purge something still required."},
+  {a:"Disaster Recovery", f:"DR / redundancy", c:"pacs", d:"Replicated copies and failover capability so images remain available (and recoverable) through hardware failure, outage, or site loss.", n:"Failover and recovery scenarios are essential, if uncomfortable, tests for a clinical system."},
+  {a:"Image Cache", f:"Local cache", c:"pacs", d:"A temporary, fast-access copy of frequently used images kept close to the viewer to speed up display.", n:"Stale-cache bugs (showing an outdated copy after a change) are subtle — test cache invalidation."},
+  {a:"Compression", f:"Lossy vs lossless", c:"pacs", d:"Reducing image file size. Lossless compression preserves every pixel exactly; lossy discards some data and is restricted for primary diagnostic use.", n:"Confirm lossy is never silently applied where lossless is required, and that fidelity meets policy."},
+  {a:"Diagnostic Display / Calibration", f:"Medical-grade monitors", c:"pacs", d:"Radiologists read on calibrated, medical-grade displays meeting strict luminance/grayscale standards, distinct from ordinary clinical review monitors.", n:""},
+  {a:"GSDF", f:"Grayscale Standard Display Function", c:"pacs", d:"The DICOM standard defining how brightness is mapped on calibrated displays so the same image looks consistent across compliant monitors.", n:""},
+  {a:"Data Migration", f:"PACS/archive migration", c:"pacs", d:"Moving large volumes of image data from a legacy archive into a new PACS or VNA — a complex, high-stakes project prone to data loss and mapping errors.", n:"Migrations need exhaustive reconciliation: counts, integrity, and tag mapping verified before and after."},
+  {a:"Media Import / CD", f:"Outside study import", c:"pacs", d:"Ingesting studies brought from another facility on CD/DVD or via exchange — frequently requiring patient/order reconciliation before they're usable.", n:"Imported studies arrive with foreign identifiers — a core reconciliation workflow worth heavy testing."},
+  {a:"Smart Worklist", f:"Rules-driven worklist", c:"pacs", d:"A dynamic reading list that auto-prioritizes and assigns studies using rules (priority, subspecialty, balancing) rather than a static queue.", n:""},
+
+  // ---- ADDED COVERAGE ----
+  {a:"CPOE", f:"Computerized Provider Order Entry", c:"workflow", d:"The system clinicians use to enter orders — including imaging requests — electronically, replacing paper and verbal orders and cutting transcription errors.", n:"The digital origin of an order: a clean place to start tracing data through the whole chain."},
+  {a:"EMPI", f:"Enterprise Master Patient Index", c:"systems", d:"A system that maintains one authoritative identity for each patient across all facilities and systems, linking their many local MRNs to a single person.", n:"The backbone of patient matching; merge/split and duplicate-record errors here cascade everywhere — test them hard."},
+  {a:"Patient Portal", f:"Patient-facing access", c:"general", d:"A secure website or app where patients view their records, results, and images and message their providers.", n:"Result-release rules and timing (e.g., holding sensitive results) are testable policy logic with privacy stakes."},
+  {a:"DICOMweb", f:"WADO / QIDO / STOW-RS", c:"dicom", d:"The web/REST family of DICOM services — STOW-RS to store, QIDO-RS to query, WADO-RS to retrieve — powering browser- and cloud-based imaging instead of classic DIMSE networking.", n:"Zero-footprint and cloud viewers depend on it; expect HTTP/REST test cases alongside traditional DICOM."},
+  {a:"CAD / Imaging AI", f:"Computer-Aided Detection & AI", c:"radiology", d:"Algorithms that flag, measure, or triage findings to assist the radiologist — from older computer-aided detection to modern AI models, many of which are regulated medical devices.", n:"AI is software under test: validate its accuracy claims, failure modes, and exactly how its output reaches the reader."},
+  {a:"DICOMDIR", f:"DICOM directory file", c:"dicom", d:"An index file on imaging media (a CD/DVD) that catalogs the DICOM studies stored there so a viewer can navigate them.", n:"Central to CD/media import testing — a malformed DICOMDIR is a common import-failure cause."},
+  {a:"Cine / Multi-frame", f:"Multi-frame image", c:"modality", d:"A single DICOM object holding many frames played as a loop — common in ultrasound, angiography, and echo. It behaves differently from a single still image.", n:"Playback, frame navigation, and storage of multi-frame objects deserve their own dedicated tests."},
+  {a:"CDA", f:"Clinical Document Architecture", c:"interop", d:"An HL7 standard for structured clinical documents (discharge summaries, reports) exchanged between systems, often as part of document sharing.", n:""},
+  {a:"Consent", f:"Patient consent", c:"general", d:"A patient's documented authorization for a procedure or for sharing their information — increasingly tracked digitally and enforced by systems.", n:"Consent-driven access and sharing rules are testable, with real privacy consequences if they misfire."},
+  {a:"Cloud PACS / SaaS", f:"Cloud-hosted imaging", c:"pacs", d:"Delivering PACS/VNA capabilities from cloud infrastructure rather than on-premises servers, changing how storage, access, and scaling work.", n:"Shifts testing toward availability, latency, multi-tenancy, and data-residency concerns."},
+  {a:"Pixel Data", f:"DICOM image pixels", c:"dicom", d:"The actual image content inside a DICOM object (tag 7FE0,0010), separate from the descriptive metadata held in the other tags.", n:"Round-trip tests should confirm pixel data survives transfer and compression intact wherever lossless is required."},
+
+  // ---- SUB-MODALITIES ----
+  {a:"Tomosynthesis (DBT)", f:"Digital Breast Tomosynthesis / 3D mammo", c:"modality", d:"A mammography technique capturing multiple low-dose projections and reconstructing them into thin slices to reduce tissue overlap. Produces large multi-slice datasets alongside conventional 2D images.", n:"Huge objects plus paired 2D, 3D, and synthesized 'C-View' images — test storage, the right hanging protocol, and that the 2D/3D pairs never get separated."},
+  {a:"DSA", f:"Digital Subtraction Angiography", c:"modality", d:"A fluoroscopic technique that digitally subtracts a pre-contrast 'mask' from contrast images so only the vessels remain. Common in interventional work.", n:"Mask/subtraction handling and frame relationships are subtle — verify masks and runs stay correctly associated through transfer."},
+  {a:"Interventional Radiology (IR)", f:"Image-guided procedures", c:"modality", d:"A subspecialty using imaging (fluoroscopy, CT, ultrasound) to guide minimally invasive procedures such as biopsies, ablations, and stenting.", n:"Mixes live imaging, dose tracking, and procedure logs — multiple object types and a dose report per case to validate."},
+  {a:"DEXA / DXA", f:"Bone Densitometry (BMD)", c:"modality", d:"A low-dose X-ray scan measuring bone mineral density to assess osteoporosis, producing small images plus numeric BMD and T-score results.", n:"The clinically important output is the numeric report, not the pixels — confirm structured results flow through, not just the image."},
+  {a:"SPECT", f:"Single Photon Emission CT", c:"modality", d:"A nuclear-medicine method producing 3D functional images from gamma-emitting tracers, frequently fused with CT (SPECT/CT) for anatomic context.", n:"Fused SPECT/CT tests registration and that both datasets travel and display together."},
+  {a:"CBCT", f:"Cone Beam CT", c:"modality", d:"A CT variant using a cone-shaped beam and flat-panel detector, common in dental, ENT, and angio suites. Often produces non-standard volumes.", n:"CBCT data can deviate from typical CT conventions — a good conformance edge case for viewers and archives."},
+  {a:"Fluoroscopy", f:"Real-time X-ray (RF)", c:"modality", d:"Continuous real-time X-ray used to watch motion or guide procedures, producing multi-frame cine clips rather than single exposures.", n:"Multi-frame playback, frame rate, and cumulative dose tracking are the focus."},
+  {a:"Scout / Localizer", f:"Topogram / scanogram", c:"modality", d:"A quick low-dose image taken first to plan the main acquisition (the CT 'scout'). It is a real image object that accompanies the study.", n:"Often mishandled in hanging — verify localizers are present, labeled, and not confused with diagnostic images."},
+
+  // ---- RECONSTRUCTION & PROCESSING ----
+  {a:"MPR", f:"Multiplanar Reconstruction", c:"modality", d:"Reformatting a 3D stack of slices into other planes (coronal, sagittal, oblique) without rescanning the patient.", n:"Clarify whether MPR is generated on the fly by the viewer or stored as new series — stored reconstructions add objects to manage."},
+  {a:"MIP", f:"Maximum Intensity Projection", c:"modality", d:"A rendering projecting the brightest voxels along each ray, emphasizing structures like contrast-filled vessels or bone.", n:""},
+  {a:"Volume Rendering (3D)", f:"VRT", c:"modality", d:"Rendering the full 3D volume with depth, color, and opacity for a lifelike view used in surgical and vascular planning.", n:"Usually viewer-generated; if exported as secondary captures, those derived images need their own identity and lineage checks."},
+  {a:"Reconstruction Kernel", f:"Algorithm & slice thickness", c:"modality", d:"Settings governing how raw CT data is reconstructed — the kernel (sharp vs smooth) and slice thickness — yielding multiple series from one acquisition.", n:"One scan can produce several series at different kernels/thicknesses; confirm all expected reconstructions arrive and are distinctly labeled."},
+  {a:"Contrast Phases", f:"Arterial / venous / delayed", c:"modality", d:"Multiple acquisitions timed to contrast flow (arterial, portal-venous, delayed), creating several series that must be labeled and compared.", n:"Phase labels live in series descriptions and vary across vendors — a real hanging-protocol and matching headache to test."},
+
+  // ---- DICOM INTERNALS (edge-case territory) ----
+  {a:"IOD", f:"Information Object Definition", c:"dicom", d:"The DICOM blueprint specifying which attributes a given object type (CT Image, Enhanced MR, etc.) must, may, or must not contain.", n:"The formal spec behind 'what fields belong here' — your reference when deciding whether a missing or extra tag is actually a defect."},
+  {a:"VR", f:"Value Representation", c:"dicom", d:"The data type of a DICOM attribute (e.g., DA for date, PN for person name, US for unsigned short) that governs how its value is formatted and parsed.", n:"VR mismatches and malformed values (bad dates, over-length names) are classic interface bugs — fuzz these deliberately."},
+  {a:"Tag Types (1/2/3)", f:"Required / optional attributes", c:"dicom", d:"DICOM requirement levels: Type 1 must be present and valued, Type 2 must be present but may be empty, Type 3 is optional; 1C/2C are conditionally required.", n:"The type tells you whether an empty or absent tag is a violation or allowed — essential for triaging conformance findings."},
+  {a:"Private Tags", f:"Vendor-specific elements", c:"dicom", d:"Non-standard data elements (odd group numbers) that vendors use for proprietary information, identified by a private creator string.", n:"They can carry PHI or break other systems — check de-identification handles them and that tag morphing doesn't strip ones a downstream system needs."},
+  {a:"Specific Character Set", f:"Text encoding (0008,0005)", c:"dicom", d:"The DICOM attribute declaring how text is encoded (ISO_IR 100, UTF-8, etc.), affecting names with accents or non-Latin scripts.", n:"Internationalized names are a frequent corruption point — test accented and multibyte characters end to end."},
+  {a:"Photometric Interpretation", f:"MONOCHROME / RGB / YBR", c:"dicom", d:"How pixel values map to displayed grayscale or color — e.g., MONOCHROME1 (inverted), MONOCHROME2, RGB, or YBR color spaces.", n:"MONOCHROME1-vs-2 inversion and color-space mishandling produce visibly wrong images — a high-severity display test."},
+  {a:"Modality LUT / VOI LUT", f:"Rescale & windowing", c:"dicom", d:"Values and tables (Rescale Slope/Intercept, Window Center/Width) that convert stored pixels into meaningful units like CT Hounsfield, then to display brightness.", n:"Wrong rescale or default window makes images look wrong or unreadable — verify against the modality's intended presentation."},
+  {a:"Pixel Representation", f:"Signed/unsigned & bit depth", c:"dicom", d:"Attributes (Bits Allocated/Stored, High Bit, Pixel Representation) describing how each pixel is encoded, including whether values are signed.", n:"Signed/unsigned and bit-depth errors cause inverted or clipped pixels — a subtle rendering edge case worth explicit tests."},
+  {a:"Burned-in Annotation", f:"Pixel-embedded text/PHI", c:"dicom", d:"Text such as names, dates, or measurements rendered directly into the image pixels rather than stored as metadata — common in ultrasound and screen captures.", n:"Metadata de-identification will not remove it — confirm de-id also blacks out or flags burned-in PHI, a serious privacy gap."},
+  {a:"Frame of Reference", f:"FoR UID", c:"dicom", d:"A shared coordinate-system identifier that lets images from the same or fused studies be spatially related (e.g., PET aligned to CT).", n:"Fusion and registration break silently when frames of reference don't match — a targeted test for multimodality viewers."},
+  {a:"KOS", f:"Key Object Selection", c:"dicom", d:"A DICOM object flagging specific images as significant, with a reason, so readers can jump straight to the important slices.", n:"Verify KOS references still resolve to the right instances after data moves or is re-identified."},
+  {a:"Secondary Capture (SC)", f:"SC image object", c:"dicom", d:"A DICOM wrapper for images that did not originate from a DICOM modality — scanned documents, screenshots, or photos converted into DICOM.", n:"SC objects often have thin metadata; check they still carry correct patient/study identity and don't bypass reconciliation."},
+  {a:"Enhanced (Multi-frame) IOD", f:"Enhanced CT/MR objects", c:"dicom", d:"Newer DICOM objects that pack an entire series into one multi-frame instance with shared and per-frame functional groups, instead of many single-frame objects.", n:"Classic vs Enhanced handling differs greatly — test both, since some systems support one and mangle the other."},
+  {a:"Spatial Registration", f:"Registration object", c:"dicom", d:"A DICOM object storing the transform that aligns one image set to another, enabling fusion and follow-up comparison.", n:"Registration accuracy and its persistence across systems is precise, testable, and dangerous when wrong."},
+
+  // ---- ADVANCED CARDIOLOGY ----
+  {a:"FFR / iFR", f:"Fractional Flow Reserve", c:"cardio", d:"Pressure-based measurements taken during catheterization to judge whether a coronary narrowing is significant enough to treat.", n:"Numeric physiological results that must reach the report accurately — another non-image data path to validate."},
+  {a:"Stress Echo", f:"Stress echocardiography", c:"cardio", d:"An echocardiogram performed at rest and under stress (exercise or dobutamine) to compare heart function and detect ischemia.", n:"Paired rest/stress series shown side by side — test that the pairs stay linked and hang in the correct arrangement."},
+  {a:"ICE", f:"Intracardiac Echocardiography", c:"cardio", d:"Ultrasound imaging from a catheter inside the heart, used to guide structural and electrophysiology procedures.", n:""},
+  {a:"3D Echo", f:"Real-time 3D echocardiography", c:"cardio", d:"Echocardiography capturing volumetric heart data, enabling 3D views and more accurate chamber measurements.", n:"Volumetric echo objects can be large and vendor-specific — a conformance and storage edge case."},
+  {a:"Strain / Speckle Tracking", f:"Myocardial strain", c:"cardio", d:"An echo analysis tracking tissue motion to quantify how well segments of heart muscle contract, often reported as global longitudinal strain.", n:"Results may live only inside the vendor's analysis package — confirm they actually reach the structured report."},
+  {a:"12-lead ECG (Waveform)", f:"ECG Waveform SOP", c:"cardio", d:"The standard diagnostic ECG from twelve leads, storable as a DICOM Waveform object carrying the actual signal samples plus measurements.", n:"Waveform SOP classes are easy to overlook — verify capture, storage, and display of real waveform objects, not just PDFs."},
+  {a:"CIED Data", f:"Pacemaker/ICD device data", c:"cardio", d:"Information from cardiac implantable electronic devices (pacemakers, defibrillators), often gathered via remote monitoring into cardiology systems.", n:"A distinct data stream and vendor ecosystem; integration and patient-identity matching are the test concerns."},
+  {a:"Agatston Score", f:"Coronary calcium score", c:"cardio", d:"A standardized numeric score quantifying coronary artery calcium from a gated CT, used to estimate cardiovascular risk.", n:"The deliverable is the computed number in the report — validate the score, not just the images, makes it through."},
+
+  // ---- ADVANCED RADIOLOGY ----
+  {a:"SUV", f:"Standardized Uptake Value", c:"radiology", d:"A quantitative measure of tracer uptake in PET, used to characterize lesions and track treatment response.", n:"SUV depends on correct patient weight, dose, and timing in the headers — bad inputs silently yield wrong numbers."},
+  {a:"Recall / Callback", f:"Screening recall", c:"radiology", d:"Bringing a screening patient back for additional imaging after a suspicious or inconclusive screen, common in mammography.", n:"Recall is a workflow state with real follow-up consequences — test the state transitions and tracking."},
+  {a:"Peer Review / RADPEER", f:"Quality peer review", c:"radiology", d:"A process re-reviewing and scoring radiologists' prior interpretations for quality, often via the ACR's RADPEER scheme.", n:"Touches sensitive quality data and access control — test who can see what and that scoring stays correctly attributed."},
+  {a:"Voice Recognition Reporting", f:"Speech-to-text dictation", c:"radiology", d:"Radiologists dictate reports with speech recognition that drafts text in real time, integrated with the reporting/RIS system.", n:"Recognition errors and macro/template insertion are accuracy risks — test report integrity, not just connectivity."}
+];
+
+/* =========================================================
+   STATE & STORAGE (graceful — works in any host)
+   ========================================================= */
+const SafeStore = (()=> {
+  let mem = {};
+  let ok = false;
+  try { const k="__t"; localStorage.setItem(k,"1"); localStorage.removeItem(k); ok = true; } catch(e){ ok = false; }
+  return {
+    get(k){ try{ return ok ? localStorage.getItem(k) : (mem[k] ?? null);}catch(e){return mem[k]??null;} },
+    set(k,v){ try{ ok ? localStorage.setItem(k,v) : (mem[k]=v);}catch(e){mem[k]=v;} }
+  };
+})();
+
+let known = new Set();
+try{ const raw = SafeStore.get("il_known"); if(raw) known = new Set(JSON.parse(raw)); }catch(e){}
+function saveKnown(){ SafeStore.set("il_known", JSON.stringify([...known])); refreshStats(); renderModules(); }
+function termId(t){ return t.a; }
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+const views = document.querySelectorAll('.view');
+const navBtns = document.querySelectorAll('nav button');
+function show(id){
+  views.forEach(v=>v.classList.toggle('active', v.id===id));
+  navBtns.forEach(b=>b.classList.toggle('active', b.dataset.view===id));
+  if(id==='paths' && typeof renderPathsHome==='function' &&
+     document.getElementById('path-detail').style.display!=='block'){ renderPathsHome(); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+navBtns.forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
+document.querySelectorAll('[data-jump]').forEach(el=>el.addEventListener('click',()=>show(el.dataset.jump)));
+
+/* =========================================================
+   STATS
+   ========================================================= */
+function refreshStats(){
+  document.getElementById('stat-terms').textContent = TERMS.length;
+  document.getElementById('stat-cats').textContent = Object.keys(CATS).length;
+  document.getElementById('stat-learned').textContent = known.size;
+}
+
+/* =========================================================
+   MODULES (home)
+   ========================================================= */
+function renderModules(){
+  const grid = document.getElementById('mod-grid');
+  grid.innerHTML = '';
+  Object.entries(CATS).forEach(([key,c])=>{
+    const items = TERMS.filter(t=>t.c===key);
+    const learnedN = items.filter(t=>known.has(termId(t))).length;
+    const pct = Math.round((learnedN/items.length)*100) || 0;
+    const el = document.createElement('button');
+    el.className='mod';
+    el.innerHTML = `
+      <div class="swatch" style="background:${c.color}"></div>
+      <div class="tagn">// ${key}</div>
+      <h4>${c.label}</h4>
+      <p>${c.blurb}</p>
+      <div class="meta">
+        <span class="count">${items.length} terms · ${learnedN} known</span>
+        <span class="go">drill →</span>
+      </div>
+      <div class="pbar"><i style="width:${pct}%"></i></div>`;
+    el.addEventListener('click',()=>{ show('learn'); setFilter(key); });
+    grid.appendChild(el);
+  });
+}
+
+/* =========================================================
+   FLASHCARDS
+   ========================================================= */
+let fcFilter = 'all';
+let fcDeck = [];
+let fcPos = 0;
+const card3d = document.getElementById('card3d');
+
+function buildFilters(containerId, onPick, withAll=true){
+  const cont = document.getElementById(containerId);
+  cont.innerHTML='';
+  const make=(key,label,color)=>{
+    const p=document.createElement('button');
+    p.className='pill'; p.textContent=label; p.dataset.key=key;
+    if(color) p.style.setProperty('--c',color);
+    p.addEventListener('click',()=>onPick(key));
+    cont.appendChild(p);
+  };
+  if(withAll) make('all','All terms');
+  Object.entries(CATS).forEach(([k,c])=>make(k,c.label,c.color));
+}
+
+function setFilter(key){
+  fcFilter = key;
+  document.querySelectorAll('#fc-filters .pill').forEach(p=>p.classList.toggle('on', p.dataset.key===key));
+  fcDeck = key==='all' ? [...TERMS] : TERMS.filter(t=>t.c===key);
+  fcPos = 0;
+  renderCard();
+}
+
+function renderCard(){
+  if(!fcDeck.length) return;
+  card3d.classList.remove('flip');
+  const t = fcDeck[fcPos];
+  const c = CATS[t.c];
+  document.getElementById('fc-cat').textContent = c.label;
+  document.getElementById('fc-cat2').textContent = c.label;
+  document.getElementById('fc-cat').style.color = c.color;
+  document.getElementById('fc-cat2').style.color = c.color;
+  document.getElementById('fc-abbr').textContent = t.a;
+  document.getElementById('fc-full').textContent = t.f;
+  document.getElementById('fc-def').textContent = t.d;
+  const noteEl = document.getElementById('fc-note');
+  if(t.n){ noteEl.style.display='block'; noteEl.innerHTML = `<b>QA lens</b>${t.n}`; }
+  else { noteEl.style.display='none'; }
+  document.getElementById('fc-idx').textContent = (fcPos+1)+'/'+fcDeck.length;
+  document.getElementById('fc-idx2').textContent = (fcPos+1)+'/'+fcDeck.length;
+  document.getElementById('fc-progress').textContent = (fcPos+1)+' / '+fcDeck.length;
+  const kbtn = document.getElementById('mark-known');
+  const isKnown = known.has(termId(t));
+  kbtn.textContent = isKnown ? 'Known ✓' : 'I know this ✓';
+  kbtn.style.opacity = isKnown ? '.6' : '1';
+}
+document.getElementById('scene').addEventListener('click',()=>card3d.classList.toggle('flip'));
+document.getElementById('next').addEventListener('click',()=>{ fcPos=(fcPos+1)%fcDeck.length; renderCard(); });
+document.getElementById('prev').addEventListener('click',()=>{ fcPos=(fcPos-1+fcDeck.length)%fcDeck.length; renderCard(); });
+document.getElementById('mark-known').addEventListener('click',(e)=>{
+  e.stopPropagation();
+  const t=fcDeck[fcPos]; known.add(termId(t)); saveKnown();
+  if(fcPos<fcDeck.length-1){ fcPos++; renderCard(); } else renderCard();
+});
+document.getElementById('mark-again').addEventListener('click',(e)=>{
+  e.stopPropagation();
+  const t=fcDeck[fcPos]; known.delete(termId(t)); saveKnown(); renderCard();
+});
+document.addEventListener('keydown',(e)=>{
+  if(!document.getElementById('learn').classList.contains('active')) return;
+  if(e.key==='ArrowRight') document.getElementById('next').click();
+  if(e.key==='ArrowLeft') document.getElementById('prev').click();
+  if(e.key===' '){ e.preventDefault(); card3d.classList.toggle('flip'); }
+});
+
+/* =========================================================
+   GLOSSARY
+   ========================================================= */
+let glossFilter='all';
+function renderGloss(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const list = document.getElementById('gloss-list');
+  let items = [...TERMS].sort((a,b)=>a.a.localeCompare(b.a));
+  if(glossFilter!=='all') items = items.filter(t=>t.c===glossFilter);
+  if(q) items = items.filter(t=> (t.a+' '+t.f+' '+t.d+' '+(t.n||'')).toLowerCase().includes(q));
+  document.getElementById('gloss-count').textContent =
+    `${items.length} ${items.length===1?'entry':'entries'}${q?` matching "${q}"`:''}`;
+  list.innerHTML='';
+  if(!items.length){ list.innerHTML = '<div class="empty">No terms match your search.</div>'; return; }
+  items.forEach(t=>{
+    const c = CATS[t.c];
+    const d = document.createElement('details');
+    d.className='gentry';
+    d.innerHTML = `
+      <summary>
+        <span class="dot" style="background:${c.color}"></span>
+        <span class="term-abbr">${t.a}</span>
+        <span class="term-full">${t.f}</span>
+        <span class="chev mono">›</span>
+      </summary>
+      <div class="gbody">
+        <div class="def">${t.d}</div>
+        ${t.n?`<div class="note"><b>QA lens</b>${t.n}</div>`:''}
+      </div>`;
+    list.appendChild(d);
+  });
+}
+document.getElementById('search').addEventListener('input', renderGloss);
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+const quizCard = document.getElementById('quiz-card');
+let quiz = { qs:[], i:0, score:0, mode:'mix' };
+const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(p=>p[1]);
+
+function startScreen(){
+  quizCard.innerHTML = `
+    <div class="quiz-start">
+      <div class="qprompt">10-question round</div>
+      <h2 style="font-family:'Fraunces',serif;font-size:1.9rem;font-weight:900;margin:6px 0 4px;letter-spacing:-.01em">Ready to check your fluency?</h2>
+      <p>Questions are drawn at random from all ${TERMS.length} terms. Pick a mode and go — your best run is yours to beat.</p>
+      <div class="mode-row" id="mode-row">
+        <button class="pill on" data-mode="mix">Mixed</button>
+        <button class="pill" data-mode="abbr">Acronym → meaning</button>
+        <button class="pill" data-mode="def">Definition → term</button>
+      </div>
+      <button class="btn btn-solid" id="quiz-go" style="border-color:var(--signal);color:#fff">Start quiz →</button>
+    </div>`;
+  document.querySelectorAll('#mode-row .pill').forEach(p=>p.addEventListener('click',()=>{
+    document.querySelectorAll('#mode-row .pill').forEach(x=>x.classList.remove('on'));
+    p.classList.add('on'); quiz.mode = p.dataset.mode;
+  }));
+  document.getElementById('quiz-go').addEventListener('click', beginQuiz);
+}
+
+function beginQuiz(){
+  const pick = shuffle([...TERMS]).slice(0,10);
+  quiz.qs = pick.map(t=>{
+    const distractors = shuffle(TERMS.filter(x=>x.a!==t.a)).slice(0,3);
+    const asDef = quiz.mode==='def' || (quiz.mode==='mix' && Math.random()<0.5);
+    let prompt, question, correct, options;
+    if(asDef){
+      prompt = "Which term matches this definition?";
+      question = t.d;
+      correct = `${t.a} — ${t.f}`;
+      options = shuffle([correct, ...distractors.map(x=>`${x.a} — ${x.f}`)]);
+    } else {
+      prompt = `What does "${t.a}" stand for / mean?`;
+      question = `<span class="qabbr">${t.a}</span> &nbsp;·&nbsp; ${t.f}`;
+      correct = t.d.split('. ')[0] + '.';
+      options = shuffle([correct, ...distractors.map(x=> x.d.split('. ')[0] + '.')]);
+    }
+    return {prompt, question, correct, options};
+  });
+  quiz.i=0; quiz.score=0;
+  renderQ();
+}
+
+function renderQ(){
+  const q = quiz.qs[quiz.i];
+  const keys = ['A','B','C','D'];
+  quizCard.innerHTML = `
+    <div class="quiz-meta">
+      <span class="qn">QUESTION ${quiz.i+1} / ${quiz.qs.length}</span>
+      <span class="score">SCORE ${quiz.score}</span>
+    </div>
+    <div class="qbar"><i style="width:${(quiz.i/quiz.qs.length)*100}%"></i></div>
+    <div class="qprompt">${q.prompt}</div>
+    <div class="qquestion">${q.question}</div>
+    <div class="opts" id="opts"></div>
+    <div class="qnext" id="qnext"></div>`;
+  const opts = document.getElementById('opts');
+  q.options.forEach((o,idx)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="key">${keys[idx]}</span><span>${o}</span>`;
+    b.addEventListener('click',()=>answer(b,o,q));
+    opts.appendChild(b);
+  });
+}
+
+function answer(btn, chosen, q){
+  const all = document.querySelectorAll('.opt');
+  all.forEach(b=>b.disabled=true);
+  const correct = chosen===q.correct;
+  if(correct){ btn.classList.add('correct'); quiz.score++; }
+  else {
+    btn.classList.add('wrong');
+    all.forEach(b=>{ if(b.querySelector('span:last-child').textContent===q.correct) b.classList.add('correct'); });
+  }
+  document.querySelector('.score').textContent = 'SCORE '+quiz.score;
+  const nx = document.getElementById('qnext');
+  nx.innerHTML = `
+    <span class="qexplain">${correct?'<b>Correct.</b>':'<b>Not quite.</b>'} ${correct?'':'The highlighted answer is right.'}</span>
+    <button class="btn btn-solid" id="qadv" style="border-color:var(--signal);color:#fff">${quiz.i<quiz.qs.length-1?'Next →':'See results'}</button>`;
+  document.getElementById('qadv').addEventListener('click',()=>{
+    if(quiz.i<quiz.qs.length-1){ quiz.i++; renderQ(); } else resultScreen();
+  });
+}
+
+function resultScreen(){
+  const pct = Math.round((quiz.score/quiz.qs.length)*100);
+  let grade, color;
+  if(pct>=90){grade="Fluent";color="var(--signal)";}
+  else if(pct>=70){grade="Solid footing";color="var(--signal)";}
+  else if(pct>=50){grade="Getting there";color="var(--amber)";}
+  else {grade="Keep drilling";color="var(--coral)";}
+  let best = parseInt(SafeStore.get('il_best')||'0',10);
+  const isBest = quiz.score>best;
+  if(isBest) SafeStore.set('il_best', String(quiz.score));
+  quizCard.innerHTML = `
+    <div class="quiz-result">
+      <div class="qprompt">Round complete</div>
+      <div class="result-score" style="color:${color}">${quiz.score}<span style="font-size:2rem;color:var(--ink-soft)">/${quiz.qs.length}</span></div>
+      <div class="result-grade" style="color:${color}">${grade} · ${pct}%</div>
+      <p style="margin:18px auto 26px;color:var(--ink-soft);max-width:40ch">
+        ${isBest?'🏆 New personal best!':'Personal best: '+Math.max(best,quiz.score)+' / 10'}
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-solid" id="again" style="border-color:var(--signal);color:#fff">Play again</button>
+        <button class="btn" id="toglossary" style="border-color:var(--ink);color:var(--ink)">Review glossary</button>
+      </div>
+    </div>`;
+  document.getElementById('again').addEventListener('click', startScreen);
+  document.getElementById('toglossary').addEventListener('click',()=>show('glossary'));
+}
+
+/* =========================================================
+   LEARNING PATHS
+   ========================================================= */
+const PATHS = [
+  { id:"foundations", title:"Imaging Foundations", color:"#0d6e6e",
+    desc:"Start here. The core systems, the modalities, and how a study travels from scanner to report.",
+    stages:[
+      {name:"The big picture", note:"What 'enterprise imaging' means and the systems in play.", terms:["Enterprise Imaging","PACS","RIS","VNA","HIS","EHR"]},
+      {name:"The machines", note:"The modalities that actually create images.", terms:["Modality","CT","MRI / MR","US","DR / DX","MG"]},
+      {name:"Order to report", note:"The workflow that ties people and systems together.", terms:["Order / Requisition","Accession Number","Worklist","Technologist","Radiologist","Report status"]}
+    ]},
+  { id:"dicom", title:"DICOM Deep Dive", color:"#e8552d",
+    desc:"The standard at the heart of every imaging system — file format, data hierarchy, and the networking verbs.",
+    stages:[
+      {name:"Objects & identity", note:"How imaging data is structured and uniquely named.", terms:["DICOM","Study / Series / Instance","UID","DICOM Tag","SOP Class"]},
+      {name:"Networking", note:"How devices actually exchange images.", terms:["AE Title","DIMSE","C-ECHO","C-STORE","C-FIND","C-MOVE / C-GET"]},
+      {name:"Workflow services", note:"The services that drive acquisition and storage.", terms:["MWL","MPPS","Storage Commitment","Transfer Syntax","Conformance Statement"]}
+    ]},
+  { id:"interop", title:"Interoperability & Interfaces", color:"#c98a14",
+    desc:"How the non-image data flows: HL7, FHIR, and the IHE profiles that make vendors play together.",
+    stages:[
+      {name:"HL7 v2 basics", note:"The workhorse messaging format behind most interfaces.", terms:["HL7 v2","Segment / Field","ADT","ORM / OMG","ORU","ACK","MLLP"]},
+      {name:"Modern & profiles", note:"APIs and the standardized workflow recipes built on the standards.", terms:["FHIR","IHE","IHE SWF","XDS / XDS-I","PIX / PDQ"]}
+    ]},
+  { id:"radiology", title:"Radiology in Practice", color:"#2f7d4f",
+    desc:"The clinical side of the house — contrast, dose, the reading process, and structured reporting.",
+    stages:[
+      {name:"Acquisition", note:"What happens before and during the scan.", terms:["Contrast Media","Gadolinium","Projection / View","ALARA","Radiation Dose","Phantom"]},
+      {name:"Reading & reporting", note:"How an exam becomes a diagnosis.", terms:["Wet Read / Prelim","Findings vs Impression","Subspecialty Read","Discrepancy","Critical Findings","Teleradiology"]},
+      {name:"Standardized reporting", note:"Structured schemes that constrain how findings are recorded.", terms:["BI-RADS","RADS systems","Incidental Finding"]}
+    ]},
+  { id:"cardio", title:"Cardiology Imaging", color:"#b5295a",
+    desc:"Beyond radiology — echo, the cath lab, ECG, and the cardiovascular data that lands in CVIS and PACS.",
+    stages:[
+      {name:"Non-invasive", note:"Imaging the heart from outside the body.", terms:["ECG / EKG","Echocardiogram","TEE","Nuclear Stress / MPI","Cardiac CT / Calcium Score","Cardiac MRI"]},
+      {name:"The cath lab", note:"Invasive imaging and intervention.", terms:["Cardiac Catheterization","Coronary Angiography","PCI","Hemodynamics","IVUS","EP"]},
+      {name:"Data & measurements", note:"The structured data cardiology produces.", terms:["CVIS","Ejection Fraction","SR"]}
+    ]},
+  { id:"pacs", title:"PACS Operations & Admin", color:"#6d28d9",
+    desc:"What keeps a PACS running day to day: moving images, storing them, displaying them, and handling exceptions.",
+    stages:[
+      {name:"Moving images", note:"Getting studies to the right place automatically.", terms:["Auto-routing","Prefetching","DICOM Router / Gateway","Tag Morphing / Coercion","Smart Worklist"]},
+      {name:"Storing images", note:"Where studies live and for how long.", terms:["Tiered Storage","Study Lifecycle / Retention","Disaster Recovery","Image Cache","Compression"]},
+      {name:"Viewing & exceptions", note:"Display quality and the inevitable messy data.", terms:["Diagnostic Display / Calibration","GSDF","Reconciliation","Media Import / CD"]},
+      {name:"Big projects", note:"The high-stakes one.", terms:["Data Migration"]}
+    ]},
+  { id:"qa", title:"The QA Track", color:"#a8331a",
+    desc:"Tie it back to your role — how imaging systems and their interfaces actually get validated and tested.",
+    stages:[
+      {name:"Regulatory frame", note:"Why imaging QA is documented and rigorous.", terms:["PACS as Medical Device","SaMD","IEC 62304","Verification vs Validation"]},
+      {name:"Testing imaging", note:"The techniques and tools of the trade.", terms:["Conformance Testing","Interface Testing","DICOM Validation Tools","HL7 / DICOM Simulator","Round-trip Testing"]},
+      {name:"Evidence & rigor", note:"Proving coverage and protecting data.", terms:["Synthetic / De-identified Test Data","Traceability Matrix","Regression Testing","IQ / OQ / PQ","Audit Trail"]}
+    ]}
+];
+const findTerm = a => TERMS.find(t=>t.a===a);
+
+function renderPathsHome(){
+  document.getElementById('path-detail').style.display='none';
+  const home = document.getElementById('paths-home');
+  home.style.display='block';
+  home.innerHTML = '<div class="mod-grid"></div>';
+  const grid = home.querySelector('.mod-grid');
+  PATHS.forEach((p,i)=>{
+    const all = p.stages.flatMap(s=>s.terms);
+    const ln = all.filter(a=>known.has(a)).length;
+    const pct = Math.round(ln/all.length*100)||0;
+    const el=document.createElement('button');
+    el.className='mod';
+    el.innerHTML = `
+      <div class="swatch" style="background:${p.color}"></div>
+      <div class="tagn">// path ${String(i+1).padStart(2,'0')}</div>
+      <h4>${p.title}</h4>
+      <p>${p.desc}</p>
+      <div class="meta">
+        <span class="count">${p.stages.length} stages · ${all.length} terms · ${ln} known</span>
+        <span class="go" style="color:${p.color}">open →</span>
+      </div>
+      <div class="pbar"><i style="width:${pct}%;background:${p.color}"></i></div>`;
+    el.addEventListener('click',()=>renderPathDetail(p));
+    grid.appendChild(el);
+  });
+}
+
+function renderPathDetail(p){
+  document.getElementById('paths-home').style.display='none';
+  const det = document.getElementById('path-detail');
+  det.style.display='block';
+  const all = p.stages.flatMap(s=>s.terms);
+  const ln = all.filter(a=>known.has(a)).length;
+  const pct = Math.round(ln/all.length*100)||0;
+  let stagesHTML='';
+  p.stages.forEach((s,si)=>{
+    let chips='';
+    s.terms.forEach(a=>{
+      const t = findTerm(a); if(!t) return;
+      const isK = known.has(a);
+      chips += `<details class="gentry">
+        <summary>
+          <span class="dot" style="background:${CATS[t.c].color}"></span>
+          <span class="term-abbr">${t.a}</span>
+          <span class="term-full">${t.f}</span>
+          <span class="kdot ${isK?'on':''}"></span>
+          <span class="chev mono">›</span>
+        </summary>
+        <div class="gbody">
+          <div class="def">${t.d}</div>
+          ${t.n?`<div class="note"><b>QA lens</b>${t.n}</div>`:''}
+          <button class="btn pk ${isK?'done':''}" data-a="${t.a}" style="margin-top:14px;font-size:.8rem;padding:8px 16px;border-color:var(--ink);color:var(--ink)">${isK?'Marked known ✓':'Mark known ✓'}</button>
+        </div>
+      </details>`;
+    });
+    stagesHTML += `<div class="stage">
+      <div class="stage-marker" style="background:${p.color}">${si+1}</div>
+      <div class="stage-body">
+        <h5>${s.name}</h5>
+        ${s.note?`<p class="stage-note">${s.note}</p>`:''}
+        <div class="gloss-list path-list">${chips}</div>
+      </div>
+    </div>`;
+  });
+  det.innerHTML = `
+    <button class="back-link" id="path-back">‹ All paths</button>
+    <div class="path-hero">
+      <div class="swatch" style="background:${p.color};width:48px;height:8px"></div>
+      <h3 style="color:${p.color}">${p.title}</h3>
+      <p>${p.desc}</p>
+      <div class="path-prog">
+        <div class="pbar" style="flex:1;height:6px"><i style="width:${pct}%;background:${p.color}"></i></div>
+        <span class="mono">${ln}/${all.length}</span>
+      </div>
+      <button class="btn btn-solid" id="path-fc" style="background:${p.color};border-color:${p.color};color:#fff;margin-top:18px">Study these as flashcards →</button>
+    </div>
+    <div class="roadmap">${stagesHTML}</div>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('path-back').addEventListener('click',renderPathsHome);
+  document.getElementById('path-fc').addEventListener('click',()=>{
+    const deck = all.map(findTerm).filter(Boolean);
+    startCustomDeck(deck);
+  });
+  det.querySelectorAll('.pk').forEach(b=>b.addEventListener('click',(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    const a=b.dataset.a;
+    const nowKnown = !known.has(a);
+    if(nowKnown) known.add(a); else known.delete(a);
+    saveKnown();
+    b.textContent = nowKnown ? 'Marked known ✓' : 'Mark known ✓';
+    b.classList.toggle('done', nowKnown);
+    const kd = b.closest('details').querySelector('.kdot');
+    if(kd) kd.classList.toggle('on', nowKnown);
+    const nl = all.filter(x=>known.has(x)).length;
+    det.querySelector('.path-prog .pbar i').style.width = (Math.round(nl/all.length*100)||0)+'%';
+    det.querySelector('.path-prog .mono').textContent = nl+'/'+all.length;
+  }));
+}
+
+function startCustomDeck(deck){
+  document.querySelectorAll('#fc-filters .pill').forEach(pl=>pl.classList.remove('on'));
+  fcFilter='__custom'; fcDeck=deck; fcPos=0;
+  show('learn');
+  renderCard();
+}
+
+/* =========================================================
+   JOURNEY — Maria's story, with hand-built SVG scenes
+   ========================================================= */
+const SVG = {
+  open:`<svg viewBox="0 0 400 220" fill="none" stroke="#1a1f26" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">`,
+};
+const SCENE_SVG = [
+  // 1 — symptom at home
+  `${SVG.open}<line x1="30" y1="188" x2="370" y2="188"/>
+    <rect x="55" y="118" width="92" height="70"/><path d="M47 118 L101 82 L155 118"/><rect x="92" y="150" width="24" height="38"/>
+    <circle cx="262" cy="98" r="16"/><path d="M262 114 V160 M262 130 L240 142 M262 130 L250 150 M262 160 L249 188 M262 160 L276 188"/>
+    <g stroke="#e8552d"><path d="M285 134 l9 -6 M291 124 l3 -10 M297 132 l10 -4"/></g></svg>`,
+  // 2 — doctor visit (EHR)
+  `${SVG.open}<line x1="35" y1="178" x2="365" y2="178"/>
+    <rect x="150" y="92" width="104" height="64" rx="4"/><line x1="202" y1="156" x2="202" y2="178"/><line x1="180" y1="178" x2="224" y2="178"/>
+    <g stroke="#0d6e6e" stroke-width="2"><path d="M164 110 h76 M164 123 h60 M164 136 h76"/></g>
+    <circle cx="306" cy="96" r="14"/><path d="M306 110 V156 M306 124 l-20 12 M306 124 l20 10"/>
+    <circle cx="92" cy="100" r="14"/><path d="M92 114 V158 M92 128 l-16 12 M92 128 l16 12"/></svg>`,
+  // 3 — order travels (HL7)
+  `${SVG.open}<rect x="42" y="78" width="70" height="92" rx="4"/><g stroke-width="2"><path d="M42 104 h70 M42 130 h70"/></g><circle cx="57" cy="91" r="3" fill="#0d6e6e" stroke="none"/>
+    <rect x="288" y="78" width="70" height="92" rx="4"/><g stroke-width="2"><path d="M288 104 h70 M288 130 h70"/></g><circle cx="303" cy="91" r="3" fill="#0d6e6e" stroke="none"/>
+    <path d="M118 124 H282" stroke="#0d6e6e" stroke-dasharray="6 7"/>
+    <g transform="translate(178,110)"><rect x="0" y="0" width="44" height="30" rx="3" fill="#fbf9f4" stroke="#e8552d"/><path d="M0 4 L22 21 L44 4" stroke="#e8552d"/></g>
+    <text x="200" y="98" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#1a1f26" text-anchor="middle" stroke="none">HL7</text></svg>`,
+  // 4 — scheduling / worklist + clock
+  `${SVG.open}<rect x="70" y="52" width="140" height="124" rx="6"/><rect x="112" y="43" width="56" height="18" rx="5"/>
+    <g stroke-width="2"><path d="M122 86 h70 M122 110 h70 M122 134 h70"/></g>
+    <g stroke="#0d6e6e"><path d="M92 82 l4 7 l8 -12 M92 106 l4 7 l8 -12"/></g><path d="M90 130 h12" stroke-width="2"/>
+    <circle cx="305" cy="116" r="42"/><path d="M305 116 V88 M305 116 l20 12" stroke-width="2.6"/></svg>`,
+  // 5 — CT scan
+  `${SVG.open}<rect x="150" y="40" width="100" height="135" rx="12"/><circle cx="200" cy="107" r="44"/><circle cx="200" cy="107" r="22" stroke="#0d6e6e"/>
+    <line x1="38" y1="138" x2="158" y2="138" stroke-width="3"/><line x1="242" y1="138" x2="362" y2="138" stroke-width="3"/><line x1="70" y1="138" x2="70" y2="178"/><line x1="330" y1="138" x2="330" y2="178"/>
+    <path d="M52 130 h96" stroke="#e8552d" stroke-width="3"/><circle cx="58" cy="126" r="6" fill="#e8552d" stroke="none"/></svg>`,
+  // 6 — into PACS / VNA
+  `${SVG.open}<rect x="48" y="66" width="82" height="104" rx="5"/><g stroke-width="2"><path d="M48 100 h82 M48 134 h82"/></g>
+    <circle cx="64" cy="83" r="3" fill="#0d6e6e" stroke="none"/><circle cx="64" cy="117" r="3" fill="#0d6e6e" stroke="none"/><circle cx="64" cy="151" r="3" fill="#e8552d" stroke="none"/>
+    <path d="M130 118 C185 118 195 88 248 88 M130 118 C185 118 195 150 248 150" stroke="#0d6e6e" stroke-dasharray="5 6"/>
+    <rect x="248" y="60" width="92" height="58" rx="4" fill="#fbf9f4"/><rect x="260" y="72" width="92" height="58" rx="4" fill="#fbf9f4"/><rect x="272" y="84" width="92" height="58" rx="4" fill="#fbf9f4"/><circle cx="318" cy="113" r="16" stroke="#0d6e6e"/></svg>`,
+  // 7 — radiologist reads
+  `${SVG.open}<rect x="58" y="50" width="120" height="84" rx="5"/><rect x="222" y="50" width="120" height="84" rx="5"/>
+    <line x1="118" y1="134" x2="118" y2="150"/><line x1="94" y1="150" x2="142" y2="150"/><line x1="282" y1="134" x2="282" y2="150"/><line x1="258" y1="150" x2="306" y2="150"/>
+    <circle cx="118" cy="92" r="26" stroke="#0d6e6e"/><circle cx="118" cy="92" r="12" stroke="#0d6e6e"/>
+    <g stroke="#1a1f26" stroke-width="2"><path d="M244 74 h78 M244 92 h78 M244 110 h52"/></g>
+    <line x1="40" y1="206" x2="360" y2="206"/><circle cx="200" cy="172" r="13"/><path d="M200 185 V206 M200 192 l-20 8 M200 192 l20 8"/></svg>`,
+  // 8 — cardiology
+  `${SVG.open}<path d="M148 78 C148 58 118 54 108 76 C98 54 68 58 68 80 C68 110 108 132 108 132 C108 132 148 106 148 78 Z" stroke="#e8552d"/>
+    <path d="M28 168 H110 l9 -28 l12 52 l9 -24 H205" stroke="#0d6e6e" stroke-width="2.6"/><path d="M205 168 H372" stroke="#0d6e6e" stroke-width="2.6"/>
+    <path d="M258 150 C228 142 206 120 152 104" stroke-dasharray="5 6"/><circle cx="152" cy="104" r="4" fill="#1a1f26" stroke="none"/>
+    <circle cx="300" cy="70" r="22"/><path d="M291 70 l6 7 l12 -15" stroke="#0d6e6e"/></svg>`,
+  // 9 — report released / portal
+  `${SVG.open}<rect x="62" y="48" width="108" height="136" rx="5"/><g stroke-width="2"><path d="M82 80 h68 M82 100 h68 M82 120 h44"/></g>
+    <circle cx="150" cy="152" r="20" stroke="#0d6e6e"/><path d="M140 152 l7 8 l14 -17" stroke="#0d6e6e"/>
+    <path d="M188 116 H252" stroke="#e8552d"/><path d="M242 108 l12 8 l-12 8" stroke="#e8552d"/>
+    <rect x="278" y="72" width="62" height="104" rx="10"/><line x1="297" y1="166" x2="321" y2="166"/><g stroke="#0d6e6e" stroke-width="2"><path d="M293 96 h32 M293 112 h32 M293 128 h20"/></g></svg>`,
+  // 10 — governance / QA
+  `${SVG.open}<path d="M96 46 L142 62 V108 C142 140 119 159 96 170 C73 159 50 140 50 108 V62 Z"/><path d="M78 104 l11 13 l23 -29" stroke="#0d6e6e"/>
+    <circle cx="252" cy="68" r="14"/><circle cx="324" cy="118" r="14"/><circle cx="252" cy="168" r="14"/>
+    <path d="M263 76 L313 110 M252 82 V154 M263 160 L313 126" stroke="#0d6e6e" stroke-dasharray="4 6"/>
+    <text x="252" y="72" font-family="JetBrains Mono,monospace" font-size="9" font-weight="700" fill="#1a1f26" text-anchor="middle" stroke="none">FHIR</text></svg>`
+];
+
+const JOURNEY = [
+  {title:"The symptom", svg:SCENE_SVG[0],
+   narr:`Maria, 58, feels a tightness in her chest each time she climbs the stairs at home. Worried, she books a visit with her family doctor through the clinic's online portal. She's just a person with a concern — but the instant she registers, a trail of <b>personal health data</b> begins, and every system she touches is now obligated to protect it and to act only with her permission.`,
+   terms:["Patient Portal","Consent","PHI"]},
+  {title:"The doctor's visit", svg:SCENE_SVG[1],
+   narr:`Her family doctor — the <b>referring physician</b> — listens, examines her, and decides her chest needs a closer look. He opens her <b>electronic record</b> and places an order for a chest CT, entering it electronically and attaching a diagnosis code and a procedure code so the exam can be scheduled and billed correctly.`,
+   terms:["EHR","Referring Physician","CPOE","Order / Requisition","ICD-10","CPT"]},
+  {title:"The order travels", svg:SCENE_SVG[2],
+   narr:`The order doesn't sit still. An <b>HL7 message</b> carries it out of the doctor's system, through an <b>interface engine</b>, and into the radiology system, which stamps it with a unique <b>accession number</b> — the thread that will later tie her order, her images, and her report together. A master patient index quietly confirms this is the same Maria the hospital already knows, even if a department filed her under a different record number.`,
+   terms:["HL7 v2","ORM / OMG","Broker / Interface Engine","RIS","Accession Number","MRN","EMPI"]},
+  {title:"Scheduling & arrival", svg:SCENE_SVG[3],
+   narr:`Maria is given an appointment and told <b>not to eat or drink</b> beforehand. When she arrives and registers, an <b>admit message</b> updates every connected system. Her exam drops automatically onto the scanner's <b>worklist</b>, so the <b>technologist</b> simply selects her from a list rather than retyping her details — closing off a whole class of human error.`,
+   terms:["ADT","Worklist","MWL","NPO","Technologist"]},
+  {title:"The scan", svg:SCENE_SVG[4],
+   narr:`Maria lies on the table and the <b>CT scanner</b> — the modality — acquires hundreds of cross-sectional <b>slices</b>, using <b>contrast</b> to make her blood vessels stand out while keeping radiation dose <b>as low as reasonably achievable</b>. When the exam finishes, the scanner sends back a message confirming exactly what was performed.`,
+   terms:["Modality","CT","Contrast Media","ALARA","Radiation Dose","MPPS"]},
+  {title:"Into the archive", svg:SCENE_SVG[5],
+   narr:`Those images become <b>DICOM</b> objects and are pushed into <b>PACS</b> and the long-term <b>vendor-neutral archive</b>. They're organized as a <b>study → series → image</b>, each carrying a globally unique ID. The archive confirms it has stored them safely, routing rules file them where they belong, and Maria's earlier scans are <b>pre-fetched</b> so they'll be waiting the moment a radiologist opens her case.`,
+   terms:["DICOM","C-STORE","PACS","VNA","Study / Series / Instance","UID","Storage Commitment","Auto-routing","Prefetching"]},
+  {title:"The read", svg:SCENE_SVG[6],
+   narr:`A <b>radiologist</b> opens Maria's study from her reading worklist. A <b>hanging protocol</b> arranges the images automatically, with her <b>prior scans</b> beside them for comparison. She adjusts the <b>window/level</b> on screen to study the soft tissue, then dictates her <b>findings</b> and a summary <b>impression</b> into a structured report.`,
+   terms:["Radiologist","Worklist","Hanging Protocol","Prior / Comparison","Window / Level","Findings vs Impression","SR"]},
+  {title:"An unexpected turn", svg:SCENE_SVG[7],
+   narr:`The scan reveals an <b>incidental finding</b> near Maria's heart, unrelated to why she came in. She's referred to cardiology, where an <b>echocardiogram</b> measures her <b>ejection fraction</b> — how strongly her heart pumps. To be certain, a <b>cardiac catheterization</b> images her coronary arteries and records <b>pressure data</b>, all captured in the cardiovascular system rather than the radiology PACS.`,
+   terms:["Incidental Finding","Echocardiogram","Ejection Fraction","Cardiac Catheterization","Coronary Angiography","Hemodynamics","CVIS","ECG / EKG"]},
+  {title:"Results released", svg:SCENE_SVG[8],
+   narr:`The radiologist signs off and the report status becomes <b>final</b>. A <b>result message</b> delivers it straight back to her doctor and into Maria's record, and because one finding needs prompt attention, it triggers a <b>critical-results</b> notification with a documented hand-off. Days later, Maria opens her <b>patient portal</b> and reads the report herself — the whole loop measured by its <b>turnaround time</b>.`,
+   terms:["Report status","ORU","Critical Findings","Patient Portal","TAT","Teleradiology"]},
+  {title:"Everything she didn't see", svg:SCENE_SVG[9],
+   narr:`None of this felt like technology to Maria — and that's the point. Behind every step, <b>privacy rules</b> guarded her data, shared <b>standards</b> like FHIR and the IHE profiles let independent systems speak the same language, and <b>audit trails</b> recorded who touched her record. And beneath all of it sits the quiet work of <b>quality assurance</b> — verifying and validating that every handoff in this chain does exactly what it should, every single time.`,
+   terms:["HIPAA","PHI","Audit Trail","FHIR","IHE","Conformance Testing","Verification vs Validation"]}
+];
+
+/* ---- illustration library for the extra threads ---- */
+const ART = {
+  mammo:`${SVG.open}<rect x="120" y="40" width="160" height="22" rx="6"/><rect x="120" y="150" width="160" height="22" rx="6"/><ellipse cx="200" cy="106" rx="58" ry="40" stroke="#e8552d"/><circle cx="186" cy="104" r="6" fill="#e8552d" stroke="none"/><line x1="200" y1="62" x2="200" y2="84" stroke-width="2"/><line x1="200" y1="128" x2="200" y2="150" stroke-width="2"/></svg>`,
+  readers:`${SVG.open}<circle cx="90" cy="80" r="16"/><path d="M90 96 V140 M90 110 l-18 12 M90 110 l18 12"/><circle cx="165" cy="80" r="16"/><path d="M165 96 V140 M165 110 l-18 12 M165 110 l18 12"/><rect x="240" y="58" width="120" height="104" rx="6"/><g stroke="#0d6e6e" stroke-width="2"><path d="M258 86 h84 M258 104 h84 M258 122 h56"/></g><text x="300" y="152" font-family="JetBrains Mono,monospace" font-size="20" font-weight="700" fill="#e8552d" text-anchor="middle" stroke="none">B-2</text></svg>`,
+  callback:`${SVG.open}<path d="M200 60 C170 60 150 82 150 112 V134 l-14 18 h128 l-14 -18 V112 C250 82 230 60 200 60 Z"/><path d="M186 168 a14 12 0 0 0 28 0" stroke-width="2"/><path d="M315 92 a64 64 0 1 0 -12 74" stroke="#e8552d" stroke-dasharray="6 7"/><path d="M298 150 l6 22 l20 -10" stroke="#e8552d"/></svg>`,
+  review:`${SVG.open}<rect x="80" y="46" width="150" height="140" rx="6"/><g stroke-width="2"><path d="M104 78 h86 M104 98 h86 M104 118 h56"/></g><g stroke="#0d6e6e"><path d="M100 74 l4 6 l7 -10 M100 94 l4 6 l7 -10"/></g><circle cx="252" cy="138" r="34" stroke="#e8552d"/><line x1="276" y1="162" x2="312" y2="196" stroke="#e8552d" stroke-width="3"/></svg>`,
+  ecg12:`${SVG.open}<rect x="40" y="50" width="320" height="120" rx="6"/><path d="M44 70 h320 M44 150 h320" stroke="#d8d1c2" stroke-width="1"/><path d="M50 110 H110 l8 -28 l10 54 l9 -26 H184 l8 -28 l10 54 l9 -26 H262 l8 -28 l10 54 l9 -26 H354" stroke="#0d6e6e" stroke-width="2.4"/></svg>`,
+  echo:`${SVG.open}<path d="M150 80 C150 60 120 56 110 78 C100 56 70 60 70 84 C70 112 110 134 110 134 C110 134 150 108 150 80 Z" stroke="#e8552d"/><circle cx="300" cy="150" r="12"/><path d="M300 150 L208 66 A150 150 0 0 0 190 100 Z" stroke="#0d6e6e" stroke-dasharray="4 5"/></svg>`,
+  catheter:`${SVG.open}<path d="M152 70 C152 48 118 44 107 70 C96 44 62 48 62 74 C62 106 107 132 107 132 C107 132 152 102 152 70 Z" stroke="#e8552d"/><path d="M344 150 C284 140 220 110 152 96" stroke-dasharray="5 6"/><circle cx="152" cy="96" r="4" fill="#1a1f26" stroke="none"/><rect x="300" y="58" width="60" height="40" rx="4"/><path d="M308 80 l10 -12 l10 8 l12 -16" stroke="#0d6e6e" stroke-width="2"/></svg>`,
+  calcium:`${SVG.open}<circle cx="148" cy="110" r="60"/><path d="M176 92 C176 76 150 72 140 92 C130 72 104 76 104 98 C104 124 140 146 140 146 C140 146 176 120 176 92 Z" stroke="#e8552d"/><circle cx="133" cy="100" r="3" fill="#1a1f26" stroke="none"/><circle cx="150" cy="112" r="3" fill="#1a1f26" stroke="none"/><circle cx="158" cy="98" r="3" fill="#1a1f26" stroke="none"/><text x="300" y="120" font-family="JetBrains Mono,monospace" font-size="32" font-weight="700" fill="#0d6e6e" text-anchor="middle" stroke="none">412</text></svg>`,
+  device:`${SVG.open}<rect x="86" y="84" width="92" height="62" rx="10"/><line x1="132" y1="84" x2="132" y2="68"/><path d="M178 115 C212 115 212 84 244 84" stroke="#e8552d"/><g stroke="#0d6e6e"><path d="M272 92 a28 28 0 0 1 0 46 M290 78 a48 48 0 0 1 0 74"/></g><circle cx="258" cy="115" r="4" fill="#0d6e6e" stroke="none"/></svg>`,
+  mri:`${SVG.open}<rect x="120" y="48" width="160" height="124" rx="16"/><circle cx="200" cy="110" r="46"/><circle cx="200" cy="110" r="46" stroke="#0d6e6e" stroke-dasharray="6 8"/><line x1="40" y1="138" x2="130" y2="138" stroke-width="3"/><path d="M52 132 h70" stroke="#e8552d" stroke-width="3"/><circle cx="58" cy="128" r="5" fill="#e8552d" stroke="none"/></svg>`,
+  xray:`${SVG.open}<circle cx="130" cy="58" r="20"/><path d="M130 78 L100 150 L160 150 Z" stroke-width="2"/><g stroke="#0d6e6e" stroke-dasharray="4 6"><path d="M120 150 V182 M130 150 V186 M140 150 V182"/></g><rect x="94" y="188" width="72" height="14" rx="3"/><path d="M250 100 q14 -22 28 0 q14 22 28 0 M250 124 q14 -22 28 0 q14 22 28 0" stroke="#e8552d" stroke-width="2"/></svg>`,
+  nuclear:`${SVG.open}<circle cx="175" cy="110" r="10" fill="#e8552d" stroke="none"/><g><ellipse cx="175" cy="110" rx="72" ry="28"/><ellipse cx="175" cy="110" rx="72" ry="28" transform="rotate(60 175 110)"/><ellipse cx="175" cy="110" rx="72" ry="28" transform="rotate(120 175 110)"/></g><path d="M290 72 l16 22 l-16 22 M306 72 l16 22 l-16 22" stroke="#0d6e6e" stroke-width="2"/></svg>`,
+  specialty:`${SVG.open}<path d="M90 172 V70 a40 40 0 0 1 80 0 V172"/><line x1="68" y1="172" x2="192" y2="172" stroke-width="3"/><line x1="130" y1="150" x2="130" y2="172" stroke="#e8552d" stroke-width="3"/><rect x="238" y="74" width="116" height="74" rx="5"/><text x="296" y="120" font-family="JetBrains Mono,monospace" font-size="19" font-weight="700" fill="#0d6e6e" text-anchor="middle" stroke="none">T -2.1</text></svg>`,
+  cube3d:`${SVG.open}<path d="M150 70 L250 70 L300 110 L200 110 Z"/><path d="M200 110 L300 110 L300 176 L200 176 Z"/><path d="M200 110 L200 176 L150 138 L150 70 Z"/><path d="M118 58 a42 42 0 1 1 -10 30" stroke="#e8552d" stroke-dasharray="5 5"/><path d="M100 82 l8 8 l12 -12" stroke="#e8552d"/></svg>`,
+  dicomfile:`${SVG.open}<rect x="118" y="38" width="164" height="154" rx="6"/><rect x="118" y="38" width="164" height="26" rx="6" fill="#1a1f26"/><text x="200" y="56" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#f4f0e8" text-anchor="middle" stroke="none">DICM</text><g font-family="JetBrains Mono,monospace" font-size="11" fill="#1a1f26" stroke="none"><text x="134" y="92">(0010,0010)</text><text x="134" y="118">(0008,0060)</text><text x="134" y="144">(7FE0,0010)</text></g><g stroke="#0d6e6e" stroke-width="2"><path d="M236 86 h32 M236 112 h32"/></g><rect x="232" y="132" width="42" height="16" rx="2" stroke="#e8552d"/></svg>`,
+  pixels:`${SVG.open}<rect x="140" y="68" width="26" height="26" fill="#1a1f26"/><rect x="166" y="68" width="26" height="26" fill="none"/><rect x="192" y="68" width="26" height="26" fill="#1a1f26"/><rect x="218" y="68" width="26" height="26" fill="none"/><rect x="140" y="94" width="26" height="26" fill="none"/><rect x="166" y="94" width="26" height="26" fill="#1a1f26"/><rect x="192" y="94" width="26" height="26" fill="none"/><rect x="218" y="94" width="26" height="26" fill="#1a1f26"/><rect x="140" y="120" width="26" height="26" fill="#1a1f26"/><rect x="166" y="120" width="26" height="26" fill="none"/><rect x="192" y="120" width="26" height="26" fill="#1a1f26"/><rect x="218" y="120" width="26" height="26" fill="none"/><circle cx="285" cy="150" r="28" stroke="#e8552d"/><line x1="305" y1="170" x2="332" y2="196" stroke="#e8552d" stroke-width="3"/></svg>`,
+  locks:`${SVG.open}<rect x="110" y="98" width="150" height="40" rx="5"/><text x="124" y="124" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#1a1f26" stroke="none">(0019,xx)</text><rect x="286" y="106" width="46" height="40" rx="6"/><path d="M294 106 v-10 a15 15 0 0 1 30 0 v10"/><circle cx="309" cy="124" r="5" fill="#e8552d" stroke="none"/></svg>`,
+  objects:`${SVG.open}<rect x="86" y="68" width="120" height="80" rx="6" fill="#fbf9f4"/><rect x="120" y="90" width="120" height="80" rx="6" fill="#fbf9f4"/><rect x="154" y="112" width="120" height="80" rx="6" fill="#fbf9f4"/><g stroke="#0d6e6e" stroke-width="2"><path d="M172 138 h84 M172 158 h60"/></g><circle cx="306" cy="84" r="6" fill="#e8552d" stroke="none"/></svg>`,
+  wire:`${SVG.open}<rect x="44" y="76" width="74" height="94" rx="4"/><rect x="282" y="76" width="74" height="94" rx="4"/><circle cx="59" cy="90" r="3" fill="#0d6e6e" stroke="none"/><circle cx="297" cy="90" r="3" fill="#0d6e6e" stroke="none"/><path d="M118 108 H282" stroke="#0d6e6e"/><path d="M272 100 l12 8 l-12 8" stroke="#0d6e6e"/><path d="M282 140 H118" stroke="#e8552d"/><path d="M128 132 l-12 8 l12 8" stroke="#e8552d"/></svg>`,
+  web:`${SVG.open}<path d="M150 134 a40 40 0 0 1 6 -80 a52 52 0 0 1 100 8 a34 34 0 0 1 -6 72 Z"/><text x="200" y="104" font-family="JetBrains Mono,monospace" font-size="12" fill="#0d6e6e" text-anchor="middle" stroke="none">STOW · QIDO</text><text x="200" y="122" font-family="JetBrains Mono,monospace" font-size="12" fill="#0d6e6e" text-anchor="middle" stroke="none">WADO</text><path d="M200 134 V180" stroke="#0d6e6e" stroke-dasharray="4 5"/></svg>`,
+  profiles:`${SVG.open}<rect x="108" y="76" width="84" height="66" rx="10"/><rect x="170" y="100" width="84" height="66" rx="10" stroke="#e8552d"/><path d="M254 122 h36" stroke="#0d6e6e" stroke-dasharray="4 5"/><circle cx="312" cy="122" r="18" stroke="#0d6e6e"/><path d="M303 122 l6 7 l13 -15" stroke="#0d6e6e"/></svg>`,
+  manysys:`${SVG.open}<rect x="40" y="46" width="64" height="40" rx="4"/><rect x="40" y="100" width="64" height="40" rx="4"/><rect x="40" y="154" width="64" height="40" rx="4"/><path d="M104 66 C172 66 182 110 252 110 M104 120 H252 M104 174 C172 174 182 130 252 130" stroke="#0d6e6e" stroke-dasharray="5 6"/><circle cx="300" cy="100" r="18"/><path d="M300 118 V164 M300 132 l-22 12 M300 132 l22 12"/></svg>`,
+  enterprise:`${SVG.open}<rect x="78" y="60" width="120" height="132"/><path d="M78 60 L138 30 L198 60"/><g stroke-width="2"><rect x="96" y="86" width="24" height="24"/><rect x="156" y="86" width="24" height="24"/><rect x="96" y="130" width="24" height="24"/><rect x="156" y="130" width="24" height="24"/></g><g stroke="#0d6e6e"><circle cx="278" cy="70" r="14"/><circle cx="326" cy="120" r="14"/><circle cx="278" cy="170" r="14"/><path d="M198 88 L264 72 M198 120 L312 120 M198 152 L264 168" stroke-dasharray="4 6"/></g></svg>`,
+  routing:`${SVG.open}<circle cx="118" cy="110" r="24"/><path d="M118 86 v-28 M118 134 v28" stroke-width="2"/><path d="M142 110 H232" stroke="#0d6e6e"/><path d="M222 102 l12 8 l-12 8" stroke="#0d6e6e"/><path d="M142 100 C200 70 224 64 300 64" stroke="#0d6e6e" stroke-dasharray="5 6"/><path d="M142 120 C200 150 224 156 300 156" stroke="#0d6e6e" stroke-dasharray="5 6"/><rect x="300" y="50" width="56" height="28" rx="3"/><rect x="300" y="142" width="56" height="28" rx="3"/><rect x="240" y="96" width="56" height="28" rx="3"/></svg>`,
+  storage:`${SVG.open}<ellipse cx="158" cy="64" rx="58" ry="17"/><path d="M100 64 V106 a58 17 0 0 0 116 0 V64"/><path d="M100 106 a58 17 0 0 0 116 0"/><path d="M100 106 V148 a58 17 0 0 0 116 0 V106"/><path d="M286 70 V150" stroke="#0d6e6e" stroke-width="2"/><path d="M278 142 l8 12 l8 -12" stroke="#0d6e6e" stroke-width="2"/><text x="300" y="78" font-family="JetBrains Mono,monospace" font-size="10" fill="#1a1f26" stroke="none">hot</text><text x="300" y="156" font-family="JetBrains Mono,monospace" font-size="10" fill="#1a1f26" stroke="none">cold</text></svg>`,
+  monitor:`${SVG.open}<rect x="100" y="48" width="200" height="122" rx="6"/><line x1="200" y1="170" x2="200" y2="186"/><line x1="160" y1="186" x2="240" y2="186"/><rect x="120" y="100" width="22" height="52" fill="#1a1f26"/><rect x="142" y="100" width="22" height="52" fill="#3a3a3a"/><rect x="164" y="100" width="22" height="52" fill="#6a6a6a"/><rect x="186" y="100" width="22" height="52" fill="#969696"/><rect x="208" y="100" width="22" height="52" fill="#bdbdbd"/><rect x="230" y="100" width="22" height="52" fill="#dedede"/><rect x="252" y="100" width="22" height="52" fill="#f4f0e8"/><path d="M120 76 h120" stroke="#0d6e6e" stroke-width="2"/></svg>`,
+  migration:`${SVG.open}<rect x="44" y="74" width="64" height="92" rx="4"/><g stroke-width="2"><path d="M44 100 h64 M44 126 h64"/></g><rect x="292" y="74" width="64" height="92" rx="4"/><g stroke-width="2"><path d="M292 100 h64 M292 126 h64"/></g><rect x="150" y="104" width="34" height="26" rx="3" fill="#fbf9f4"/><rect x="182" y="104" width="34" height="26" rx="3" fill="#fbf9f4"/><path d="M118 152 H286" stroke="#e8552d"/><path d="M276 144 l12 8 l-12 8" stroke="#e8552d"/></svg>`,
+  money:`${SVG.open}<rect x="88" y="50" width="120" height="150" rx="6"/><g stroke-width="2"><path d="M108 80 h80 M108 100 h80 M108 120 h50"/></g><text x="148" y="174" font-family="Fraunces,serif" font-size="26" font-weight="900" fill="#0d6e6e" stroke="none">$</text><circle cx="292" cy="112" r="36" stroke="#e8552d"/><text x="292" y="124" font-family="Fraunces,serif" font-size="30" font-weight="900" fill="#e8552d" text-anchor="middle" stroke="none">$</text></svg>`,
+  rules:`${SVG.open}<rect x="234" y="56" width="124" height="144" rx="6"/><g stroke-width="2"><path d="M252 86 h88 M252 108 h88 M252 130 h64"/></g><rect x="74" y="92" width="86" height="22" rx="5" transform="rotate(-32 117 103)"/><rect x="150" y="120" width="46" height="16" rx="3" transform="rotate(-32 173 128)"/><circle cx="96" cy="74" r="6" fill="#e8552d" stroke="none"/><path d="M60 188 h96" stroke-width="3"/></svg>`,
+  qalab:`${SVG.open}<rect x="78" y="50" width="132" height="150" rx="6"/><g stroke="#0d6e6e"><path d="M98 84 l8 10 l14 -18 M98 116 l8 10 l14 -18 M98 148 l8 10 l14 -18"/></g><g stroke-width="2"><path d="M134 86 h58 M134 118 h58 M134 150 h58"/></g><path d="M270 58 v52 l-28 58 a8 8 0 0 0 8 12 h72 a8 8 0 0 0 8 -12 l-28 -58 V58" stroke="#e8552d"/><path d="M262 58 h44" stroke="#e8552d" stroke-width="2"/><path d="M252 150 h70" stroke="#e8552d"/></svg>`,
+  cert:`${SVG.open}<path d="M150 46 L196 62 V108 C196 140 173 159 150 170 C127 159 104 140 104 108 V62 Z"/><path d="M132 104 l11 13 l23 -29" stroke="#0d6e6e"/><circle cx="292" cy="110" r="34"/><path d="M278 110 l9 10 l20 -22" stroke="#e8552d"/></svg>`
+};
+
+/* ---- the threads (Thread 1 reuses Maria's JOURNEY) ---- */
+const THREADS = [
+  { id:"maria", title:"Maria's Journey", color:"#0d6e6e",
+    blurb:"One patient, one chest scan, end to end — the backbone story everything else branches from.",
+    scenes: JOURNEY },
+
+  { id:"screening", title:"The Screening Pathway", color:"#2f7d4f",
+    blurb:"A symptom-free patient, a routine mammogram, and how screening programs read at scale.",
+    scenes:[
+      {title:"Routine, until it isn't", svg:ART.mammo, terms:["MG","Tomosynthesis (DBT)","Projection / View","Laterality"],
+       narr:`Donna, 52, has no symptoms — she's here for her routine <b>screening mammogram</b>. The unit takes standard <b>views</b> of each breast, carefully labeled <b>left and right</b>, and captures <b>3D tomosynthesis</b> slices so overlapping tissue can't hide a small lesion.`},
+      {title:"Read at scale", svg:ART.readers, terms:["BI-RADS","RADS systems","Subspecialty Read","CAD / Imaging AI"],
+       narr:`Screening volume is enormous, so the workflow is built for it. An <b>AI tool</b> pre-flags suspicious areas, a <b>breast-imaging specialist</b> reads the study, and the result is recorded as a standardized <b>BI-RADS</b> category — one of a whole family of structured <b>reporting systems</b> radiology uses.`},
+      {title:"A flag and a callback", svg:ART.callback, terms:["Recall / Callback","Wet Read / Prelim","Discrepancy"],
+       narr:`One area looks equivocal. Instead of a final answer, Donna gets a <b>preliminary read</b> and a <b>recall</b> — a callback for extra images. Whether that early read later matches the final one is tracked as a <b>discrepancy</b>, a quiet but important quality signal.`},
+      {title:"Keeping readers honest", svg:ART.review, terms:["Peer Review / RADPEER","Voice Recognition Reporting"],
+       narr:`Behind the scenes, radiologists' past interpretations are sampled and re-scored through <b>peer review</b>, and the reports themselves are produced quickly using <b>voice recognition</b> dictation that drafts the text as the radiologist speaks.`}
+    ]},
+
+  { id:"cathlab", title:"Down in the Cath Lab", color:"#b5295a",
+    blurb:"The cardiology deep cut — echo, the catheter, and the data the heart produces.",
+    scenes:[
+      {title:"The heart's wiring", svg:ART.ecg12, terms:["12-lead ECG (Waveform)","Holter Monitor"],
+       narr:`Raj, 61, arrives with palpitations. A <b>12-lead ECG</b> records the heart's electrical signal as a true waveform, and a wearable <b>Holter monitor</b> goes home with him to catch rhythms that come and go.`},
+      {title:"Looking without cutting", svg:ART.echo, terms:["TEE","Stress Echo","3D Echo","Strain / Speckle Tracking"],
+       narr:`Ultrasound does a lot of cardiac work. A <b>stress echo</b> compares the heart at rest and under exertion, <b>3D echo</b> builds a volume of the beating heart, a <b>TEE</b> probe goes down the esophagus for a clearer view, and <b>strain analysis</b> measures how well the muscle actually squeezes.`},
+      {title:"Into the arteries", svg:ART.catheter, terms:["PCI","IVUS","FFR / iFR","ICE","EP"],
+       narr:`In the cath lab, a catheter opens a blocked vessel — a <b>PCI</b>. Along the way, <b>intravascular ultrasound</b> images the artery from inside, an <b>FFR</b> pressure wire judges whether a narrowing truly matters, and <b>intracardiac echo</b> and <b>electrophysiology</b> tools guide rhythm procedures.`},
+      {title:"Scoring the risk", svg:ART.calcium, terms:["Cardiac CT / Calcium Score","Agatston Score","Cardiac MRI","Nuclear Stress / MPI"],
+       narr:`Many patients never reach the cath lab. A <b>calcium-scoring CT</b> yields an <b>Agatston score</b> estimating coronary risk, while <b>cardiac MRI</b> and a <b>nuclear stress</b> test assess heart muscle and blood flow without a catheter.`},
+      {title:"Hearts that phone home", svg:ART.device, terms:["CIED Data"],
+       narr:`Raj leaves with an implanted device. From then on, his <b>pacemaker/defibrillator</b> transmits monitoring data remotely into the cardiology system — its own quiet stream of clinical information to store, manage, and match to the right patient.`}
+    ]},
+
+  { id:"modtour", title:"A Tour of the Modalities", color:"#c98a14",
+    blurb:"Everything beyond the chest CT — the full imaging zoo and how slices become pictures.",
+    scenes:[
+      {title:"Sound and magnets", svg:ART.mri, terms:["US","MRI / MR","Gadolinium","Contrast Phases"],
+       narr:`Not everything is a CT. <b>Ultrasound</b> uses sound waves with no radiation at all; <b>MRI</b> uses powerful magnets and often <b>gadolinium</b> contrast; and many CT and MR exams capture several <b>contrast phases</b> — timed passes as dye moves through the body.`},
+      {title:"The X-ray family", svg:ART.xray, terms:["CR","DR / DX","XA / RF","Fluoroscopy","DSA","Scout / Localizer"],
+       narr:`Plain X-ray takes many forms: older <b>computed radiography</b> plates, modern <b>digital radiography</b>, real-time <b>fluoroscopy</b> and <b>angiography</b>, vessel-only <b>digital subtraction</b>, and the quick <b>scout</b> image taken first to plan the main scan.`},
+      {title:"Function over form", svg:ART.nuclear, terms:["NM","PET","SPECT","SUV"],
+       narr:`<b>Nuclear medicine</b> images what tissue is doing rather than how it looks, using injected tracers — including <b>PET</b> and <b>SPECT</b>. PET lesions are often graded by an <b>SUV</b> uptake number.`},
+      {title:"Specialty scanners", svg:ART.specialty, terms:["DEXA / DXA","CBCT","Interventional Radiology (IR)"],
+       narr:`Some machines do one job well: <b>DEXA</b> measures bone density, <b>cone-beam CT</b> serves dental and ENT, and <b>interventional radiology</b> suites use live imaging to guide needles and catheters through the body.`},
+      {title:"From slices to 3D", svg:ART.cube3d, terms:["MPR","MIP","Volume Rendering (3D)","Reconstruction Kernel","Cine / Multi-frame"],
+       narr:`A stack of slices is raw material. <b>Multiplanar reconstruction</b> reslices it in any plane, <b>MIP</b> and <b>volume rendering</b> turn it into projections and lifelike 3D, the <b>reconstruction kernel</b> tunes sharpness, and motion studies arrive as <b>multi-frame cine</b>.`}
+    ]},
+
+  { id:"dicom", title:"Inside DICOM", color:"#e8552d",
+    blurb:"Pop the hood on the data itself — where requirements get vague and defects love to hide.",
+    scenes:[
+      {title:"Anatomy of a DICOM file", svg:ART.dicomfile, terms:["DICOM Tag","IOD","VR","Tag Types (1/2/3)","Pixel Data"],
+       narr:`Open any image as data and it's a <b>DICOM file</b>: a long list of tagged fields, each governed by a blueprint (the <b>IOD</b>) saying what must appear, typed by a <b>value representation</b>, and marked <b>required or optional</b> — all ending in the <b>pixel data</b> itself.`},
+      {title:"How pixels become a picture", svg:ART.pixels, terms:["Photometric Interpretation","Modality LUT / VOI LUT","Pixel Representation"],
+       narr:`Those raw numbers aren't an image until they're interpreted: the <b>photometric interpretation</b> says how values map to gray or color, <b>rescale and windowing</b> tables turn them into meaningful brightness, and <b>signed-vs-unsigned</b> encoding decides whether they render correctly or inverted.`},
+      {title:"The dangerous corners", svg:ART.locks, terms:["Private Tags","Specific Character Set","Burned-in Annotation","De-identification"],
+       narr:`This is where QA earns its keep. <b>Private vendor tags</b> can smuggle data, the wrong <b>character set</b> can corrupt accented names, and <b>burned-in annotations</b> hide patient details inside the pixels — all of which proper <b>de-identification</b> has to catch.`},
+      {title:"Objects beyond the image", svg:ART.objects, terms:["GSPS","KOS","Secondary Capture (SC)","Enhanced (Multi-frame) IOD","Spatial Registration","Frame of Reference"],
+       narr:`DICOM stores more than pictures: a <b>presentation state</b> remembers how to display, <b>key object selection</b> flags the important slices, <b>secondary capture</b> wraps non-DICOM content, <b>enhanced multi-frame</b> objects pack a whole series into one, and <b>registration</b> with a shared <b>frame of reference</b> lets datasets line up for fusion.`},
+      {title:"Talking on the wire", svg:ART.wire, terms:["SOP Class","AE Title","DIMSE","C-ECHO","C-FIND","C-MOVE / C-GET","Transfer Syntax","Conformance Statement"],
+       narr:`To move images, devices speak DICOM over the network. Each declares an <b>AE title</b>, agrees on a <b>SOP class</b> and <b>transfer syntax</b>, and trades <b>DIMSE</b> commands — <b>echo</b> to verify, <b>find</b> to query, <b>move/get</b> to retrieve — all spelled out in a <b>conformance statement</b>.`},
+      {title:"The modern web side", svg:ART.web, terms:["DICOMweb","DICOMDIR"],
+       narr:`Newer systems skip classic networking for <b>DICOMweb</b> — REST calls to store, query, and retrieve over plain HTTP — while a humble <b>DICOMDIR</b> still indexes the studies burned onto a CD.`}
+    ]},
+
+  { id:"plumbing", title:"The Plumbing", color:"#2563a8",
+    blurb:"How the non-image data flows and how independent systems are made to cooperate.",
+    scenes:[
+      {title:"Anatomy of a message", svg:SCENE_SVG[2], terms:["Segment / Field","MLLP","ACK"],
+       narr:`Step inside an <b>HL7 v2</b> feed and it's plain text: <b>segments and fields</b> split by pipes and carets, wrapped in the <b>MLLP</b> envelope on the wire, with an <b>acknowledgment</b> coming back for every message — accepted or rejected.`},
+      {title:"Profiles that make it click", svg:ART.profiles, terms:["IHE SWF","XDS / XDS-I","PIX / PDQ","CDA"],
+       narr:`Standards alone don't guarantee cooperation, so <b>IHE profiles</b> like Scheduled Workflow give exact recipes; <b>XDS</b> shares documents and images across organizations, <b>PIX/PDQ</b> matches patients between them, and <b>CDA</b> carries structured clinical documents.`},
+      {title:"One patient, many systems", svg:ART.manysys, terms:["HIS","EMR","Reconciliation","STAT"],
+       narr:`A hospital runs many systems — the <b>HIS</b>, departmental <b>EMRs</b>, and more — that rarely agree perfectly. <b>Reconciliation</b> fixes studies that arrived mismatched, and a <b>STAT</b> flag jumps the queue when minutes matter.`},
+      {title:"Where everyone looks", svg:ART.enterprise, terms:["Enterprise Imaging","Zero-footprint viewer"],
+       narr:`The endgame is <b>enterprise imaging</b> — every department's images on one platform — viewed through a <b>zero-footprint viewer</b> that opens in any browser, with nothing to install.`}
+    ]},
+
+  { id:"control", title:"The Control Room", color:"#6d28d9",
+    blurb:"What keeps a PACS alive day to day: routing, storage, displays, and big moves.",
+    scenes:[
+      {title:"Getting images where they belong", svg:ART.routing, terms:["Smart Worklist","DICOM Router / Gateway","Tag Morphing / Coercion"],
+       narr:`In the PACS control room, traffic is choreographed: <b>routing rules</b> and a <b>DICOM gateway</b> forward studies, a <b>smart worklist</b> assigns them, and <b>tag morphing</b> quietly corrects identifiers in transit — powerful, and dangerous if a rule is wrong.`},
+      {title:"Where it all lives", svg:ART.storage, terms:["Tiered Storage","Study Lifecycle / Retention","Image Cache","Compression","Disaster Recovery","Cloud PACS / SaaS"],
+       narr:`Images pile up fast. <b>Tiered storage</b> keeps recent studies fast and old ones cheap, <b>retention rules</b> decide what gets purged, a <b>cache</b> speeds access, <b>compression</b> shrinks files, and <b>disaster recovery</b> — increasingly in the <b>cloud</b> — keeps everything surviving an outage.`},
+      {title:"Made to be seen", svg:ART.monitor, terms:["Diagnostic Display / Calibration","GSDF"],
+       narr:`Diagnosis demands fidelity, so radiologists read on <b>calibrated, medical-grade displays</b> tuned to the <b>GSDF</b> standard, so the same image looks identical on every compliant monitor.`},
+      {title:"Outside studies & big moves", svg:ART.migration, terms:["Media Import / CD","Data Migration"],
+       narr:`Two recurring headaches close the loop: importing outside studies from <b>CDs and exchanges</b>, and the high-stakes <b>data migration</b> when an entire archive is moved to a new system.`}
+    ]},
+
+  { id:"proof", title:"Money, Rules & Proof", color:"#a8331a",
+    blurb:"The business, the regulation, and the QA work that quietly stands behind every patient.",
+    scenes:[
+      {title:"Who pays, and how it's coded", svg:ART.money, terms:["CMS","Payer","NPI"],
+       narr:`None of this is free. <b>Payers</b> and programs run by <b>CMS</b> reimburse the care, every provider is identified by an <b>NPI</b>, and each exam is billed with standardized procedure and diagnosis codes.`},
+      {title:"The rules of the road", svg:ART.rules, terms:["HITECH","PII"],
+       narr:`Beyond HIPAA, laws like <b>HITECH</b> tightened enforcement and breach rules, and the broader category of <b>personally identifiable information</b> shapes what every system may collect, display, and share.`},
+      {title:"Software that's a medical device", svg:ART.cert, terms:["PACS as Medical Device","SaMD","IEC 62304"],
+       narr:`Here's the part that reframes your role: diagnostic imaging software is a regulated <b>medical device</b> — <b>software as a medical device</b> — built under lifecycle standards like <b>IEC 62304</b>. A defect can carry patient-safety and regulatory weight.`},
+      {title:"Proving it works", svg:ART.qalab, terms:["Interface Testing","DICOM Validation Tools","HL7 / DICOM Simulator","Round-trip Testing","Synthetic / De-identified Test Data","Phantom","Regression Testing","Traceability Matrix","IQ / OQ / PQ"],
+       narr:`And so the entire chain has to be proven. <b>Interface testing</b>, <b>conformance tools</b> and <b>simulators</b>, <b>round-trip</b> integrity checks, <b>safe synthetic data</b> and scanned <b>phantoms</b>, <b>regression</b> suites, a <b>traceability matrix</b>, and formal <b>IQ/OQ/PQ</b> qualification — this is the work that quietly stands behind every patient like Maria.`}
+    ]}
+];
+
+let activeThread = 0;
+function renderThreadBar(){
+  const bar = document.getElementById('thread-bar'); bar.innerHTML='';
+  THREADS.forEach((th,i)=>{
+    const p=document.createElement('button');
+    p.className='pill'+(i===activeThread?' on':'');
+    p.textContent=(i+1)+'. '+th.title;
+    p.addEventListener('click',()=>{ activeThread=i; renderThreadBar(); renderThread(i); });
+    bar.appendChild(p);
+  });
+}
+function renderThread(idx){
+  const th = THREADS[idx];
+  const scenes = th.scenes;
+  const nterms = new Set(scenes.flatMap(s=>s.terms)).size;
+  const intro = document.getElementById('thread-intro');
+  intro.style.borderLeftColor = th.color;
+  intro.innerHTML = `<div class="tnum" style="color:${th.color}">${idx+1}</div>
+    <div class="ttext"><h4>${th.title}</h4><p>${th.blurb}</p>
+    <div class="meta">${scenes.length} scenes · ${nterms} terms</div></div>`;
+  const wrap = document.getElementById('journey-scenes'); wrap.innerHTML='';
+  scenes.forEach((sc,i)=>{
+    const flip=i%2===1;
+    const sec=document.createElement('div'); sec.className='scene'+(flip?' flip':'');
+    let chips='<div class="chips"><span class="lbl">Terms in this scene — tap to define</span>';
+    sc.terms.forEach(a=>{ const t=findTerm(a); const col=t?CATS[t.c].color:'var(--ink-soft)';
+      chips+=`<button class="tchip" data-a="${a}"><span class="cdot" style="background:${col}"></span>${a}</button>`; });
+    chips+='</div>';
+    sec.innerHTML=`<div class="illo">${sc.svg}</div><div class="scene-body">
+      <div class="stagenum" style="color:${th.color}">SCENE ${String(i+1).padStart(2,'0')} / ${String(scenes.length).padStart(2,'0')}</div>
+      <h4>${sc.title}</h4><div class="narr">${sc.narr}</div>${chips}</div>`;
+    wrap.appendChild(sec);
+  });
+  wrap.querySelectorAll('.tchip').forEach(b=>b.addEventListener('click',()=>openTerm(b.dataset.a)));
+}
+function renderJourney(){ renderThreadBar(); renderThread(activeThread); }
+
+/* ---- term definition modal ---- */
+function openTerm(a){
+  const t = findTerm(a); if(!t) return;
+  const c = CATS[t.c];
+  const cat = document.getElementById('m-cat');
+  cat.textContent = c.label; cat.style.color = c.color;
+  document.getElementById('m-abbr').textContent = t.a;
+  document.getElementById('m-full').textContent = t.f;
+  document.getElementById('m-def').textContent = t.d;
+  const note = document.getElementById('m-note');
+  if(t.n){ note.style.display='block'; note.innerHTML = '<b>QA lens</b>'+t.n; }
+  else note.style.display='none';
+  document.getElementById('modal-bg').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal-bg').classList.remove('show'); }
+document.getElementById('modal-x').addEventListener('click', closeModal);
+document.getElementById('modal-bg').addEventListener('click',(e)=>{ if(e.target.id==='modal-bg') closeModal(); });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
+
+/* =========================================================
+   INIT
+   ========================================================= */
+buildFilters('fc-filters', setFilter);
+buildFilters('gloss-filters', (k)=>{ glossFilter=k;
+  document.querySelectorAll('#gloss-filters .pill').forEach(p=>p.classList.toggle('on', p.dataset.key===k));
+  renderGloss();
+});
+document.querySelector('#gloss-filters .pill').classList.add('on');
+setFilter('all');
+renderGloss();
+renderModules();
+renderPathsHome();
+renderJourney();
+refreshStats();
+startScreen();
+</script>
+</body>
+</html>
